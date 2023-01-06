@@ -1,3 +1,4 @@
 *.o
 *.hi
 .stack-work/
+xmonad
