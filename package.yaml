@@ -1,0 +1,72 @@
+name:                xmonad-config
+version:             0.1.0.0
+github:              "Kariiem/xmonad-config"
+license:             BSD3
+author:              "Karim Taha"
+copyright:           "2022 Karim Taha"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/Kariiem/xmonad-config#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- containers
+- xmonad
+- xmonad-contrib
+- xmobar
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+- -O2
+library:
+  source-dirs: src
+
+executables:
+  xmonad:
+    main:                xmonad.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    dependencies:
+    - xmonad-config
+  xmobar:
+    main:               xmobar.hs
+    source-dirs:        app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    dependencies:
+    - xmonad-config
+
+tests:
+  xmonad-config-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - xmonad-config

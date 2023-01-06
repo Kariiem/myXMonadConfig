@@ -1,0 +1,29 @@
+# A snapshot resolver dictates the compiler version and the set of packages
+# to be used for project dependencies.
+resolver: 
+  #ghc-9.0.2
+  nightly-2022-11-05
+
+# User packages to be built.
+packages:
+- .
+# Dependency packages to be pulled from upstream that are not in the resolver.
+extra-deps:
+- xmobar-0.44.2
+- netlink-1.1.1.0
+# Override default flag values for local packages and extra-deps
+
+# Control whether we use the GHC we find on the path
+system-ghc: true
+
+
+flags:
+ xmobar:
+   all_extensions: true
+   with_threaded: true
+
+ghc-options:
+  $everything: '-O2'
+
+# Allow a newer minor version of GHC than the snapshot specifies
+# compiler-check: newer-minor
