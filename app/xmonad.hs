@@ -275,7 +275,7 @@ current_is_floating = do
 myEventHook :: Event -> X All
 myEventHook = composeAll [ 
      Hacks.windowedFullscreenFixEventHook 
-    , fadeWindowsEventHook 
+    -- , fadeWindowsEventHook 
     , swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
     , minimizeEventHook
     , followOnlyIf (fmap not isLayoutFloat)
@@ -291,7 +291,8 @@ isLayoutFloat = fmap (isSuffixOf "Floating") $ gets (description . W.layout . W.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
 myLogHook :: X ()
-myLogHook = fadeWindowsLogHook myFadeHook <+> workspaceHistoryHook
+myLogHook = -- fadeWindowsLogHook myFadeHook <+> 
+    workspaceHistoryHook
 
 myFadeHook :: FadeHook
 myFadeHook = composeAll [] --  [opaque, className =? "dmenu" --> transparency 0.5]
@@ -386,7 +387,7 @@ taskManager = "btm"
 -- myWorkspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 myWorkspaces :: [String]
-myWorkspaces = ["home","fecu","docs","dev","www","sys-mon"] --map show [1..9::Int] 
+myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::Int] 
 -- myWorkspaces :: Forest String
 -- myWorkspaces =
 --   [ Node
