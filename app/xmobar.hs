@@ -6,20 +6,16 @@ main = xmobar config
 config :: Config
 config =
   defaultConfig
-    { font = "xft:Fira Code:style=medium:pixelsize=16:antialias=true:hinting=true"
-    , position = TopSize L 100 24
-    , -- , additionalFonts =
-      -- [ "xft:Symbola-9"
-      -- , "xft:Symbola-10"
-      -- , "xft:Symbola-11"
-      -- , "xft:Symbola-11"
-      -- , "xft:Symbola-12"
-      -- , "xft:FontAwesome-10"
-      -- , "xft:FontAwesome-9"
-      -- ]
-      allDesktops = True
+    { font = "Hack 12" -- "Noto Color Emoji 10"
+ 
+    , position = TopHM 30 10 10 5 5 -- TopSize C 98 30
+    , additionalFonts =
+       [ 
+       "Hack 14"
+       ]
+    , allDesktops = True
     , alpha = 255
-    , bgColor = black
+    , bgColor = black -- "#ffffff" -- black
     , iconRoot = "/home/karim/.config/xmonad/"
     , commands =
         [ Run UnsafeXMonadLog
@@ -30,7 +26,7 @@ config =
         , Run battery
         , Run $ Date "%a %_d %b %Y <fc=#ee9a00>%I:%M</fc>" "date" 10
         ]
-    , template = " <icon=haskell.xpm/> %UnsafeXMonadLog%  }{ %default:Master% | %battery% | %bright% | %kbd% | %date% | %memory%"
+    , template = " <icon=haskell.xpm/> %UnsafeXMonadLog%  \xf583}{ %default:Master% | %battery% | %bright% | %kbd% | %date% | %memory%"
     , alignSep = "}{"
     }
 
@@ -70,3 +66,5 @@ battery =
     , "3"
     ]
     600
+    
+

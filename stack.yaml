@@ -9,7 +9,7 @@ packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver.
 extra-deps:
-- xmobar-0.44.2
+- xmobar-0.46
 - netlink-1.1.1.0
 # Override default flag values for local packages and extra-deps
 

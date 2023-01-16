@@ -116,12 +116,7 @@ myKeys {-fullScreenRef-} conf@XConfig { modMask = modm } = M.fromList
     , ((modm                  , xK_period)                , sendMessage (IncMasterN (-1)))
     , ((modm .|. shiftMask    , xK_q)                     , io exitSuccess)
     , ((modm                  , xK_q)                     , sbCleanupHook mySB >> spawn xmonadRestartComm) -- sbCleanupHook mySB >>
-    -- , ((modm                  , xK_q)                     , spawn "xmonad --recompile" >> restart "xmonad" True)
-      --------------------------------------------------------------------------------------------------
-    -- , ((modm                  , xK_s)                     , submap . M.fromList $ spaceControl modm)
-    -- , ((modm                  , xK_a)                     , submap . M.fromList $ applications modm)
-    , ((modm .|. shiftMask    , xK_s    )                 , sendMessage  Arrange         )
-    , ((modm .|. controlMask  , xK_s    )                 , sendMessage  DeArrange       )
+     ------------------------------------------------------------------------------------------------
      ------------------------------------------------------------------------------------------------
     , ((modm .|. shiftMask    , xK_n)                     , namedScratchpadAction scratchpads "notes")
     , ((modm                  , xK_Right)                 , nextWS)
@@ -183,21 +178,26 @@ myMouseBindings XConfig { XMonad.modMask = modm } = M.fromList
 --
 
 
-spacingRawValue :: Integer -> l a -> ModifiedLayout Spacing l a
-spacingRawValue i = spacingRaw False (Border i i i i) True (Border i i i i) True
+mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
+mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
 resizableTiled = mkToggle (single MIRROR) 
-               $ spacingRawValue 5 
+               $ mySpacing 10 10 
                $ ResizableTall 1 (3 / 100) (1 / 2) []
 
 
 threeColMid = mkToggle (single MIRROR) 
-            $ spacingRawValue  5 
+            $ mySpacing 10 10 
             $ ResizableThreeColMid 1 (3 / 100) (1 / 2) []
 
-grid = spacingRawValue 5 Grid
 
-full = Full
+
+
+
+grid = mySpacing 10 10 Grid
+
+full = mySpacing 10 10 Full
+
 
 -- Width of the window border in pixels.
 --
@@ -294,7 +294,7 @@ myLogHook :: X ()
 myLogHook = fadeWindowsLogHook myFadeHook <+> workspaceHistoryHook
 
 myFadeHook :: FadeHook
-myFadeHook = composeAll [opaque, className =? "dmenu" --> transparency 0.5]
+myFadeHook = composeAll [] --  [opaque, className =? "dmenu" --> transparency 0.5]
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -339,7 +339,7 @@ xmonadRestartComm :: String
 xmonadRestartComm = "killall xmobar; xmonad --recompile; xmonad --restart"
 
 xmobarConfigPath :: String
-xmobarConfigPath = "xmobar "
+xmobarConfigPath = "xmobar"
 
 rofiCommand :: String
 rofiCommand = "/home/karim/.config/rofi/launchers/misc/launcher.sh"
@@ -386,7 +386,7 @@ taskManager = "btm"
 -- myWorkspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 myWorkspaces :: [String]
-myWorkspaces = ["home","dev","web","docs","fecu","sys-mon"] --map show [1..9::Int] 
+myWorkspaces = ["home","fecu","docs","dev","www","sys-mon"] --map show [1..9::Int] 
 -- myWorkspaces :: Forest String
 -- myWorkspaces =
 --   [ Node
