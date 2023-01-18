@@ -36,12 +36,12 @@ ghc-options:
 - -Wredundant-constraints
 - -O2
 library:
-  source-dirs: src
+  source-dirs: lib
 
 executables:
   xmonad:
     main:                xmonad.hs
-    source-dirs:         app
+    source-dirs:         src
     ghc-options:
     - -threaded
     - -rtsopts
@@ -51,7 +51,7 @@ executables:
     - xmonad-config
   xmobar:
     main:               xmobar.hs
-    source-dirs:        app
+    source-dirs:        src
     ghc-options:
     - -threaded
     - -rtsopts
