@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, PartialTypeSignatures #-}
+{-# LANGUAGE FlexibleContexts, PartialTypeSignatures, TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
@@ -52,11 +52,13 @@ import           XMonad.Util.NamedScratchpad
 import           SBar
 import qualified FloatingLayouts as FL
 import           Theme
+import           Language.Haskell.TH.Syntax
 -----------------------------------------------------------------
 -----------------------------------------------------------------
+
 -- main
 main :: IO ()
-main = xmonad . withSB mySB . docks . ewmhFullscreen . ewmh $ defaults
+main = (xmonad . withSB mySB . docks . ewmhFullscreen . ewmh $ defaults) >> (runQ $ addDependentFile "")
 -----------------------------------------------------------------
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will

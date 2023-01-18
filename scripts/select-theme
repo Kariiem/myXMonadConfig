@@ -1,0 +1,5 @@
+#!/bin/bash
+
+choice=$(printf 'Dracula\nDoomOne\nNord\nNordLight'|dmenu -i -p "Select Theme: ")
+
+echo $choice > $XDG_CONFIG_HOME/xmonad/theme.txt

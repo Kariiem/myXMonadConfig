@@ -35,7 +35,7 @@ config =
       sepChar  = "%"
     }
 
-trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding.sh" ] "trayerpad" 10
+trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
 -- trayer = Com "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding.sh" [] "trayerpad" 20
 
 kbd = Kbd []
