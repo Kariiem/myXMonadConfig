@@ -1,12 +1,12 @@
 cradle:
   stack:
-    - path: "./src"
+    - path: "./lib"
       component: "xmonad-config:lib"
 
-    - path: "./app/xmobar.hs"
+    - path: "./src/xmobar.hs"
       component: "xmonad-config:exe:xmobar"
 
-    - path: "./app/xmonad.hs"
+    - path: "./src/xmonad.hs"
       component: "xmonad-config:exe:xmonad"
 
     - path: "./test"

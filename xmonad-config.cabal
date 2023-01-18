@@ -25,15 +25,14 @@ source-repository head
 
 library
   exposed-modules:
-      Bar
-      ButtonDeco
+      Colors
       FloatingLayouts
-      MyMaxMin
-      Utils
+      SBar
+      Theme
   other-modules:
       Paths_xmonad_config
   hs-source-dirs:
-      src
+      lib
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2
   build-depends:
       base >=4.7 && <5
@@ -48,7 +47,7 @@ executable xmobar
   other-modules:
       Paths_xmonad_config
   hs-source-dirs:
-      app
+      src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       base >=4.7 && <5
@@ -64,7 +63,7 @@ executable xmonad
   other-modules:
       Paths_xmonad_config
   hs-source-dirs:
-      app
+      src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       base >=4.7 && <5

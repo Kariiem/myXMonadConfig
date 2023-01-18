@@ -33,7 +33,6 @@ import           XMonad.Layout.MultiToggle.Instances
 import           XMonad.Layout.ResizableThreeColumns
 import           XMonad.Layout.ResizableTile
 import           XMonad.Layout.Spacing
-import           XMonad.Layout.WindowArranger
 import           XMonad.Layout.Maximize
 import           XMonad.Layout.BoringWindows
 ----------------------------------------------------------------
@@ -50,14 +49,15 @@ import qualified XMonad.Util.Hacks as Hacks
 import           XMonad.Util.NamedScratchpad
 -----------------------------------------------------------------
 -----------------------------------------------------------------
-import           Bar
+import           SBar
 import qualified FloatingLayouts as FL
+import           Theme
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -- main
 main :: IO ()
 main = xmonad . withSB mySB . docks . ewmhFullscreen . ewmh $ defaults
-
+-----------------------------------------------------------------
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
@@ -309,7 +309,12 @@ myStartupHook = do
   setWMName "LG3D"
   spawnOnce "sxhkd"
   spawnOnOnce "sys-mon" "st -e btm"
+  spawn "killall trayer"
+  spawnOnce "nm-applet"
+  spawnOnce "picom"
 
+  spawn ("sleep 2 && trayer --edge top --align right --distance 10 --distancefrom right --distance 5 --distancefrom top --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --transparent true --alpha 0 --tint "++ trayerColor ++ " --height 30")
+trayerColor = "0x"++tail (colorBack theme) 
 -- spawnOnOnce "2" browser
 -- spawn "pcmanfm --desktop &"
 ------------------------------------------------------------------------
