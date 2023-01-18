@@ -15,7 +15,7 @@ config =
       alpha = 255,
       bgColor = colorBack theme,
       fgColor = colorFore theme,
-      iconRoot = "/home/karim/.config/xmonad/",
+      iconRoot = "/home/karim/.config/xmonad/icons",
       commands =
         [ Run UnsafeXMonadLog,
           Run memory,

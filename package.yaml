@@ -8,7 +8,7 @@ copyright:           "2022 Karim Taha"
 extra-source-files:
 - README.md
 - CHANGELOG.md
-# - /home/karim/.config/xmonad/theme.txt
+
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
 # category:            Web

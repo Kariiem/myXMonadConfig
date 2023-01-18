@@ -113,6 +113,7 @@ myKeys {-fullScreenRef-} conf@XConfig { modMask = modm } = M.fromList
     , ((modm                  , xK_b)                     , sendMessage ToggleStruts)
     , ((modm                  , xK_s)                     , toggleSpaces) -- >> withAll toggleBorder ) 
     , ((modm                  , xK_t)                     , withFocused $ windows . W.sink)
+    , ((modm .|. shiftMask    , xK_t)                     , spawn changeThemeScript )
     , ((modm                  , xK_comma)                 , sendMessage (IncMasterN 1))
     , ((modm                  , xK_period)                , sendMessage (IncMasterN (-1)))
     , ((modm .|. shiftMask    , xK_q)                     , io exitSuccess)
@@ -381,6 +382,7 @@ dmenu_browse = myBin ++ "dbrowse"
 taskManager :: String
 taskManager = "btm"
 
+changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"
 
 ------------------------------------------------------------------------
 -- The default number of workspaces (virtual screens) and their names.
@@ -394,57 +396,6 @@ taskManager = "btm"
 --
 myWorkspaces :: [String]
 myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::Int] 
--- myWorkspaces :: Forest String
--- myWorkspaces =
---   [ Node
---       "doc"       -- for everyday activity's
---       [ Node "1" []   --  with 4 extra sub-workspaces, for even more activity's
---       , Node "2" []
---       , Node "3" []
---       , Node "4" []
---   , Node
---       "dev" -- for all your programming needs
---       [ Node "haskell" []
---       , Node "lean" [] -- documentation
---       ]
---   , Node "taskmanager" []    ]
-
-wsMenuWidth = 100
-wsMenuHight = 18
-
-wsMenuConf :: TSConfig a
-wsMenuConf =
-  def { ts_background = 0x00000000
-      , ts_font = "xft:Noto Sans:size=14"
-      , ts_node = (0xffffffff, 0xff004466)
-      , ts_nodealt = (0xffffffff, 0xff004466)
-      , ts_highlight = (0xff0000ff, 0xff50d0db)
-      , ts_extra = 0x00000000
-      , ts_node_width = 2*wsMenuWidth
-      , ts_node_height = 2*wsMenuHight
-      , ts_originX = 0
-      , ts_originY = 0
-      , ts_indent = 80
-      }
-
-powerMenuWidth = 100
-powerMenuHight = 18
-
-powerMenuConf :: TSConfig a
-powerMenuConf =
-  def { ts_background = 0x00000000
-      , ts_font = "xft:Noto Sans:size=14"
-      , ts_node = (0xffffffff, 0xff004466)
-      , ts_nodealt = (0xffffffff, 0xff004466)
-      , ts_highlight = (0xff0000ff, 0xff50d0db)
-      , ts_extra = 0x00000000
-      , ts_node_width = 2 * powerMenuWidth
-      , ts_node_height = 2*powerMenuHight
-      , ts_originX = 960 - powerMenuWidth
-      , ts_originY = 540-powerMenuHight
-      , ts_indent = 80
-      }
-
 -- Border colors for unfocused and focused windows, respectively.
 --
 myNormalBorderColor :: String
@@ -452,15 +403,6 @@ myNormalBorderColor = "#5599cc"
 
 myFocusedBorderColor :: String
 myFocusedBorderColor = "#55ff99" 
-
-powerMenu = treeselectAction
-  powerMenuConf
-  [ Node (TSNode "Shutdown" "" (spawn "poweroff")) []
-  , Node (TSNode "Hibernate" "" (spawn "systemctl hibernate")) []
-  , Node (TSNode "Reboot" "" (spawn "reboot")) []
-  , Node (TSNode "Logout" "" (io exitSuccess)) []
-  , Node (TSNode "Cancel" "" (return ())) []]
-
 
 scratchpads= [
 -- run htop in xterm, find it by title, use default floating window placement

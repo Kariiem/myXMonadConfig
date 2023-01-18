@@ -10,7 +10,7 @@ import TH.Theme
 import GHC.IO (unsafePerformIO)
 import Language.Haskell.TH.Syntax
 
-theme = $(conE (mkName $(runIO retrieveName )))
+theme = $(conE (mkName $(retrieveThemeName) ))
 
 
 
