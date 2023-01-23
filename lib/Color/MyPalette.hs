@@ -1,5 +1,4 @@
-module Colors where
-
+module Color.MyPalette where
 class Color a where
   colorBack,
     colorFore,

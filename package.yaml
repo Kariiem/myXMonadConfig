@@ -18,6 +18,8 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/Kariiem/xmonad-config#readme>
 
+default-extensions: ImportQualifiedPost
+
 dependencies:
 - base >= 4.7 && < 5
 - template-haskell
@@ -38,7 +40,6 @@ ghc-options:
 - -O2
 library:
   source-dirs: lib
-
 executables:
   xmonad:
     main:                xmonad.hs

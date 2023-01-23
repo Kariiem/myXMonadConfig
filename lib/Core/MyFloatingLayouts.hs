@@ -3,7 +3,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# OPTIONS_GHC -Wno-partial-type-signatures #-}
 
-module FloatingLayouts where
+module Core.MyFloatingLayouts where
 
 import XMonad
 import XMonad.Layout.BorderResize
@@ -15,7 +15,6 @@ import XMonad.Layout.Minimize
 import XMonad.Layout.NoBorders
 import XMonad.Layout.SimplestFloat
 import XMonad.Util.Image
-import XMonad.Layout.DwmStyle
 import XMonad.Layout.Renamed
 
 

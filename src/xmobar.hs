@@ -1,7 +1,6 @@
 import Text.Printf as P
-import Theme
 import Xmobar
-
+import Color.Theme
 main :: IO ()
 main = xmobar config
 
