@@ -7,8 +7,6 @@ module Theme(
 import Colors
 import Language.Haskell.TH
 import TH.Theme
-import GHC.IO (unsafePerformIO)
-import Language.Haskell.TH.Syntax
 
 theme = $(conE (mkName $(retrieveThemeName) ))
 
