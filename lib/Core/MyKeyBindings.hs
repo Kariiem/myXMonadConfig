@@ -1,6 +1,5 @@
 module Core.MyKeyBindings where
 
-import Core.MyPrograms
 import Core.MyScratchpads
 import Core.MyStatusBar
 import Data.Map qualified as M
@@ -8,10 +7,8 @@ import System.Exit
 import XMonad
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS
-import XMonad.Actions.Minimize
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.StatusBar
-import XMonad.Layout.Maximize
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.ResizableThreeColumns
@@ -65,10 +62,7 @@ myKeys conf =
         ("M-S-<Right>", addName "" $ shiftToNext),
         ("M-S-<Left>", addName "" $ shiftToPrev),
         ("M-C-<Right>", addName "" $ shiftToNext >> nextWS),
-        ("M-C-<Left>", addName "" $ shiftToPrev >> prevWS),
-        ("M-S-/", addName "" $ withFocused (sendMessage . maximizeRestore)),
-        ("M-i", addName "" $ withFocused minimizeWindow),
-        ("M-S-i", addName "" $ withLastMinimized maximizeWindowAndFocus)
+        ("M-C-<Left>", addName "" $ shiftToPrev >> prevWS)
       ]
         ++ [ ("M-" ++ m ++ show k, addName "" $ windows $ f i)
              | (i, k) <- zip (workspaces conf) [1 :: Int .. 9],
@@ -114,3 +108,37 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
     ]
 
 -- you may also bind events to the mouse scroll wheel (button4 and button5)
+fileManager :: String
+fileManager = "thunar"
+
+xmonadRestartComm :: String
+xmonadRestartComm = "killall xmobar; xmonad --recompile && xmonad --restart"
+
+rofiCommand :: String
+rofiCommand = "/home/karim/.config/rofi/launchers/misc/launcher.sh"
+
+browser :: String
+browser = "microsoft-edge-dev"
+
+fileBrowser :: String
+fileBrowser = "thunar"
+
+pdfHistory :: String
+pdfHistory = "~/script/pdf_history"
+
+powerOpts :: String
+powerOpts = "~/script/powerOptions"
+
+doom_emacsclient :: String
+doom_emacsclient = "~/script/run_emacs doom-daemon default"
+
+vanilla_emacsclient :: String
+vanilla_emacsclient = "~/script/run_emacs vanilla-daemon vanilla"
+
+dmenu_run :: String
+dmenu_run = "~/Suckless/bin/dmenu_run_history"
+
+taskManager :: String
+taskManager = "btm"
+
+changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"

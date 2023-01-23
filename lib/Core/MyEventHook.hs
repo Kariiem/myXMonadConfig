@@ -1,12 +1,8 @@
 module Core.MyEventHook where
 
-import Data.List
 import Data.Monoid
 import XMonad
-import XMonad.Hooks.Minimize
 import XMonad.Hooks.WindowSwallowing
-import XMonad.Layout.MagicFocus
-import XMonad.StackSet qualified as W
 import XMonad.Util.Hacks qualified as Hacks
 
 -- Event handling
@@ -22,13 +18,7 @@ myEventHook :: Event -> X All
 myEventHook =
   composeAll
     [ Hacks.windowedFullscreenFixEventHook,
-      -- , fadeWindowsEventHook
-      swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True),
-      minimizeEventHook,
-      followOnlyIf (fmap not isLayoutFloat)
+      swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
     ]
 
-isLayoutFloat :: X Bool
-isLayoutFloat = fmap (isSuffixOf "Floating") $ gets (description . W.layout . W.workspace . W.current . windowset)
 
---  <+> toggleableFullscreen fullScreenRef

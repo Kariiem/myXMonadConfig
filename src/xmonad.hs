@@ -3,15 +3,14 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 
+import Color.Theme
 import Core.MyEventHook
 import Core.MyKeyBindings
 import Core.MyLayoutHook
 import Core.MyLogHook
 import Core.MyMangeHook
-import Core.MyPrograms
 import Core.MyStartupHook
 import Core.MyStatusBar
-import Color.Theme
 import XMonad
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -46,6 +45,20 @@ defaults =
       logHook = myLogHook,
       startupHook = myStartupHook
     }
+
+-- The preferred terminal program, which is used in a binding below and by
+-- certain contrib modules.
+--
+myTerminal :: String
+myTerminal = "alacritty"
+
+-- Whether focus follows the mouse pointer.
+myFocusFollowsMouse :: Bool
+myFocusFollowsMouse = True
+
+-- Whether clicking on a window to focus also passes the click to the window
+myClickJustFocuses :: Bool
+myClickJustFocuses = False
 
 myModMask :: KeyMask
 myModMask = mod4Mask

@@ -1,8 +1,9 @@
 module Core.MyStartupHook where
+
+import Color.Theme
 import XMonad
 import XMonad.Hooks.SetWMName
 import XMonad.Util.SpawnOnce
-import Color.Theme 
 
 -- Startup hook
 -- Perform an arbitrary action each time xmonad starts or is restarted
@@ -31,4 +32,3 @@ trayerColor = "0x" ++ tail (colorBack theme)
 
 -- spawnOnOnce "2" browser
 -- spawn "pcmanfm --desktop &"
-

@@ -1,14 +1,12 @@
 module Core.MyStatusBar where
 
+import Color.Theme
 import XMonad
 import XMonad.Actions.CopyWindow
 import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
-import qualified XMonad.StackSet as W
+import XMonad.StackSet qualified as W
 import XMonad.Util.ClickableWorkspaces
-
-import Color.Theme
-
 
 myPP :: PP
 myPP =

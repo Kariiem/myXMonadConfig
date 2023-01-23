@@ -13,21 +13,19 @@ import XMonad.Layout.ImageButtonDecoration
 import XMonad.Layout.Maximize
 import XMonad.Layout.Minimize
 import XMonad.Layout.NoBorders
+import XMonad.Layout.Renamed
 import XMonad.Layout.SimplestFloat
 import XMonad.Util.Image
-import XMonad.Layout.Renamed
-
-
 
 floatLayout :: _ Window
 floatLayout =
   renamed [Replace "Floating"] $
-   fullDeco MyShrinker myFloatTheme $
-    maximize $
-      minimize $
-        withBorder 3 $
-          borderResize
-            simplestFloat -- simpleFloat' shrinkText noDeco
+    fullDeco MyShrinker myFloatTheme $
+      maximize $
+        minimize $
+          withBorder 3 $
+            borderResize
+              simplestFloat -- simpleFloat' shrinkText noDeco
 
 myFloatTheme :: Theme
 myFloatTheme =
@@ -71,13 +69,14 @@ instance Eq a => DecorationStyle FullDeco a where
   decorationCatchClicksHook _ = imageTitleBarButtonHandler
   decorationAfterDraggingHook _ (mainw, _) decoWin = focus mainw >> handleScreenCrossing mainw decoWin >> return ()
 
-
 data MyShrinker = MyShrinker
 
 instance Show MyShrinker where show _ = ""
-instance Read MyShrinker where readsPrec _ s = [(MyShrinker,s)]
-instance Shrinker MyShrinker where 
-    shrinkIt _ _ = [""]
+
+instance Read MyShrinker where readsPrec _ s = [(MyShrinker, s)]
+
+instance Shrinker MyShrinker where
+  shrinkIt _ _ = [""]
 
 buttonSize :: Int
 buttonSize = 10
@@ -155,19 +154,20 @@ maxiButton :: [[Bool]]
 maxiButton = convertToBool maxiButton'
 
 closeButton' :: [[Int]]
-closeButton' = [[0,0,0,0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0,0,0,0],
-                [0,0,1,1,0,0,0,0,1,1,0,0],
-                [0,0,1,1,1,0,0,1,1,1,0,0],
-                [0,0,0,1,1,1,1,1,1,0,0,0],
-                [0,0,0,0,1,1,1,1,0,0,0,0],
-                [0,0,0,0,1,1,1,1,0,0,0,0],
-                [0,0,0,1,1,1,1,1,1,0,0,0],
-                [0,0,1,1,1,0,0,1,1,1,0,0],
-                [0,0,1,1,0,0,0,0,1,1,0,0],
-                [0,0,0,0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0,0,0,0]]
-                
+closeButton' =
+  [ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  ]
 
 closeButton :: [[Bool]]
-closeButton = map (map (==0)) closeButton'
+closeButton = map (map (== 0)) closeButton'
