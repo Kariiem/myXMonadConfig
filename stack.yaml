@@ -24,6 +24,7 @@ flags:
 
 ghc-options:
   $everything: '-O2'
+  $everything: '-dynamic'
 
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
