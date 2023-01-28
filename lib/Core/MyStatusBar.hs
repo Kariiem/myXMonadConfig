@@ -13,7 +13,7 @@ myPP =
   def
     { ppCurrent = xmobarColor (colorRed theme) "",
       ppUrgent = xmobarColor (colorGreen theme) (colorBPurple theme),
-      ppLayout = xmobarFont 5 . xmobarColor (colorBPurple theme) "" . showLayoutName,
+      ppLayout = xmobarFont 5 . xmobarColor (colorBPurple theme) "" ,
       ppSep = " ",
       ppWsSep = " ",
       ppExtras = [windowCount],
@@ -41,16 +41,4 @@ mySB =
   statusBarProp "xmobar" $
     copiesPP (xmobarFont 4 . xmobarColor (colorBlack theme) "") myPP >>= clickablePP
 
--- xmobarConfigPath
--- xmobarConfigPath (pure sjanssenPP)
--- mySB = statusBarProp xmobarConfigPath (pure myPP)
-showLayoutName :: String -> String
-showLayoutName x = pad $
-  case x of
-    "Spacing ResizableThreeCol" -> "[─┤ ├─]"
-    "Mirror Spacing ResizableThreeCol" -> "[─┴──┬─]"
-    "Spacing ResizableTall" -> "[ ├─]"
-    "Mirror Spacing ResizableTall" -> "[─┬─]"
-    "Spacing Grid" -> "[#]"
-    "Full" -> "[ ]"
-    _ -> x
+

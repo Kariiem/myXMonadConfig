@@ -15,6 +15,9 @@ myStartupHook :: X ()
 myStartupHook = do
   setWMName "LG3D"
   spawnOnce "sxhkd"
+  spawnOnce "emacs --with-profile doom-emacs --daemon &"
+  spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
+
   spawnOnOnce "sys-mon" "st -e btm"
   spawn "killall trayer"
   spawnOnce "nm-applet"

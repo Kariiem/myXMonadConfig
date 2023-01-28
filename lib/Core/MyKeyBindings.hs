@@ -13,6 +13,7 @@ import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.ResizableThreeColumns
 import XMonad.Layout.Spacing
+import XMonad.Layout.WindowArranger
 import XMonad.StackSet qualified as W
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
@@ -46,10 +47,11 @@ myKeys conf =
         ("M-r", addName "" $ sendMessage $ Toggle MIRROR),
         ("M-h", addName "" $ sendMessage Shrink),
         ("M-l", addName "" $ sendMessage Expand),
-        ("M-S-l", addName "" $ sendMessage MirrorShrink),
-        ("M-S-h", addName "" $ sendMessage MirrorExpand),
-        ("M-b", addName "" $ sendMessage ToggleStruts),
+        ("M-M1-l", addName "" $ sendMessage MirrorShrink),
+        ("M-M1-h", addName "" $ sendMessage MirrorExpand),
+        ("M-S-b", addName "" $ sendMessage ToggleStruts),
         ("M-s", addName "" $ toggleSpaces),
+        ("M-b", addName "" $ sendMessage $ Toggle NOBORDERS),
         ("M-t", addName "" $ withFocused $ windows . W.sink),
         ("M-S-t", addName "" $ spawn changeThemeScript),
         ("M-,", addName "" $ sendMessage (IncMasterN 1)),
@@ -62,7 +64,19 @@ myKeys conf =
         ("M-S-<Right>", addName "" $ shiftToNext),
         ("M-S-<Left>", addName "" $ shiftToPrev),
         ("M-C-<Right>", addName "" $ shiftToNext >> nextWS),
-        ("M-C-<Left>", addName "" $ shiftToPrev >> prevWS)
+        ("M-C-<Left>", addName "" $ shiftToPrev >> prevWS),
+        ("M-M1-<Left>", addName "" $ sendMessage (MoveLeft 10)),
+        ("M-M1-<Right>", addName "" $ sendMessage (MoveRight 10)),
+        ("M-M1-<Down>", addName "" $ sendMessage (MoveDown 10)),
+        ("M-M1-<Up>", addName "" $ sendMessage (MoveUp 10)),
+        ("M1-C-<Left>", addName "" $ sendMessage (IncreaseLeft 5)),
+        ("M1-C-<Right>", addName "" $ sendMessage (IncreaseRight 5)),
+        ("M1-C-<Down>", addName "" $ sendMessage (IncreaseDown 5)),
+        ("M1-C-<Up>", addName "" $ sendMessage (IncreaseUp 5)),
+        ("M1-S-<Left>", addName "" $ sendMessage (DecreaseLeft 5)),
+        ("M1-S-<Right>", addName "" $ sendMessage (DecreaseRight 5)),
+        ("M1-S-<Down>", addName "" $ sendMessage (DecreaseDown 5)),
+        ("M1-S-<Up>", addName "" $ sendMessage (DecreaseUp 5))
       ]
         ++ [ ("M-" ++ m ++ show k, addName "" $ windows $ f i)
              | (i, k) <- zip (workspaces conf) [1 :: Int .. 9],
@@ -95,15 +109,9 @@ toggleSpaces = toggleScreenSpacingEnabled >> toggleWindowSpacingEnabled
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings XConfig {XMonad.modMask = modm} =
   M.fromList
-    -- mod-button1, Set the window to floating mode and move by dragging
-    [ ( (modm, button1),
-        \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster
-      ),
-      -- mod-button2, Raise the window to the top of the stack
+    [ ((modm, button1),                 \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster ),
       ((modm .|. controlMask, button1), \w -> focus w >> windows W.shiftMaster),
-      -- mod-button3, Set the window to floating mode and resize by dragging
-      ( (modm .|. shiftMask, button1),
-        \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster
+      ((modm .|. shiftMask, button1),   \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster
       )
     ]
 
@@ -130,10 +138,11 @@ powerOpts :: String
 powerOpts = "~/script/powerOptions"
 
 doom_emacsclient :: String
-doom_emacsclient = "~/script/run_emacs doom-daemon default"
+doom_emacsclient = "~/script/run_emacs doom doom-emacs"
 
 vanilla_emacsclient :: String
-vanilla_emacsclient = "~/script/run_emacs vanilla-daemon vanilla"
+vanilla_emacsclient =  -- "emacsclient -c -a 'emacs'" -- 
+    "~/script/run_emacs vanilla vanilla-emacs"
 
 dmenu_run :: String
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
