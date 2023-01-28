@@ -27,15 +27,6 @@ library
   exposed-modules:
       Color.MyPalette
       Color.Theme
-      Core.MyEventHook
-      Core.MyFloatingLayouts
-      Core.MyKeyBindings
-      Core.MyLayoutHook
-      Core.MyLogHook
-      Core.MyMangeHook
-      Core.MyScratchpads
-      Core.MyStartupHook
-      Core.MyStatusBar
       TH.Theme
   other-modules:
       Paths_xmonad_config

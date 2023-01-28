@@ -1,3 +1,24 @@
+#+title: XMonad Config
+#+author: Karim
+#+property: header-args :tangle src/xmonad.hs
+
+* Table of contents :toc:
+- [[#imports][Imports]]
+- [[#variables][Variables]]
+- [[#workspaces][Workspaces]]
+- [[#scratchpads][Scratchpads]]
+- [[#log-hook][Log Hook]]
+  - [[#status-bar][Status bar]]
+- [[#startup-hook][Startup Hook]]
+- [[#event-hook][Event Hook]]
+- [[#manage-hook][Manage Hook]]
+- [[#layout-hook][Layout Hook]]
+- [[#keybindings][Keybindings]]
+- [[#main][Main]]
+
+* Imports
+#+begin_src haskell
+
   -- Builtin
 import Data.Map qualified as M
 import Data.Monoid
@@ -53,7 +74,11 @@ import XMonad.Util.SpawnOnce
 
   -- MyLib
 import Color.Theme
+#+end_src
 
+
+* Variables
+#+begin_src haskell
 myTerminal ::String
 myTerminal = "alacritty"
 
@@ -109,9 +134,20 @@ taskManager = "btm"
 
 changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"
 
+
+#+end_src
+
+* Workspaces
+Workspaces are the tags that appear in the status bar, each tag corresponds to virtual workspace.
+#+begin_src haskell
 myWorkspaces :: [String]
 myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::Int]
 
+#+end_src
+
+
+* Scratchpads
+#+begin_src haskell
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
     NS "notes" "st -e nvim" (title =? "notes") defaultFloating,
@@ -122,6 +158,12 @@ scratchpads =
       (customFloating $ W.RationalRect (1 / 6) (1 / 6) (2 / 3) (2 / 3))
   ]
 
+#+end_src
+
+
+* Log Hook
+#+begin_src haskell
+
 myLogHook :: X ()
 myLogHook =
   workspaceHistoryHook
@@ -129,6 +171,12 @@ myLogHook =
 myFadeHook :: FadeHook
 myFadeHook = composeAll []
 
+#+end_src
+
+** Status bar
+This section defines a pretty printer (PP) for the status bar.
+
+#+begin_src haskell
 myPP :: PP
 myPP =
   def
@@ -162,6 +210,17 @@ mySB =
   statusBarProp "xmobar" $
     copiesPP (xmobarFont 4 . xmobarColor (colorBlack theme) "") myPP >>= clickablePP
 
+#+end_src
+
+
+* Startup Hook
+Startup hook
+Perform an arbitrary action each time xmonad starts or is restarted
+with mod-q.
+`spawnOnce` is called only the first time xmonad is started
+`spawn` is called every time xmonad is started
+#+begin_src haskell
+
 myStartupHook :: X ()
 myStartupHook = do
   setWMName "LG3D"
@@ -187,13 +246,37 @@ trayerColor = "0x" ++ tail (colorBack theme)
 -- spawnOnOnce "2" browser
 -- spawn "pcmanfm --desktop &"
 
+#+end_src
+
+
+* Event Hook
+Defines a custom handler function for X Events. The function should
+return (All True) if the default handler is to be run afterwards.
+
+#+begin_src haskell
 myEventHook :: Event -> X All
 myEventHook =
   composeAll
     [ Hacks.windowedFullscreenFixEventHook,
       swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
     ]
+#+end_src
 
+
+* Manage Hook
+Execute arbitrary actions and WindowSet manipulations when managing
+a new window. You can use this to, for example, always float a
+particular program, or have a client always appear on a particular
+workspace.
+
+To find the property name associated with a program, use
+> xprop | grep WM_CLASS
+and click on the client you're interested in.
+
+To match on the WM_NAME, you can use 'title' in the same way that
+'className' and 'resource' are used below.
+
+#+begin_src haskell
 myManageHook :: Query (Endo WindowSet)
 myManageHook =
   composeAll
@@ -208,6 +291,23 @@ myManageHook =
       className =? "Xmessage" --> doFloat
     ]
 
+#+end_src
+
+
+* Layout Hook
+The following layouts are supported
+|----------------+--------------------+------------------------------------------------------------------+-----------|
+| layout         | name in status bar | description                                                      | resizable |
+|----------------+--------------------+------------------------------------------------------------------+-----------|
+| resizableTiled | tall               | default layout, the screen is divided into master and stack.     | yes       |
+| threeColMid    | three col mid      | divide the screen into three cols, the middle one is the master. | yes       |
+| threeCol       | three col          | divide the screen into three cols, the leftmost is the master.   | yes       |
+| grid           | grid               | divide the screen into equally sized rectangles.                 | no        |
+| full           | monocle            | single window spanning the whole screen.                         | -         |
+| myFloat        | flaot              | floating window layout, resizable using mouse or keyboard.       | yes       |
+|----------------+--------------------+------------------------------------------------------------------+-----------|
+
+#+begin_src haskell
 mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
 mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
@@ -251,6 +351,12 @@ data OnlyTiled = OnlyTiled
 
 instance SetsAmbiguous OnlyTiled where
   hiddens _ _ _ mst wrs = filter (`elem` W.integrate' mst) $ map fst wrs
+
+#+end_src
+
+
+* Keybindings
+#+begin_src haskell
 
 myKeys conf =
     subTitle "XMonad Controls"
@@ -365,6 +471,13 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
     , ((modm .|. controlMask, button1) , \w -> focus w >> windows W.shiftMaster)
     , ((modm .|. shiftMask, button1)   , \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
     ]
+#+end_src
+
+
+* Main
+A structure containing your configuration settings, overriding fields in the default config. Any you don't override, will use the defaults defined in xmonad/XMonad/Config.hs
+
+#+begin_src haskell
 
 main :: IO ()
 main = xmonad
@@ -390,3 +503,5 @@ defaults = def
   , logHook = myLogHook
   , startupHook = myStartupHook
   }
+
+#+end_src
