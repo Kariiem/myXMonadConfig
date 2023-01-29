@@ -43,6 +43,7 @@ import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
+
   -- Utils
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
@@ -54,7 +55,7 @@ import XMonad.Util.SpawnOnce
   -- MyLib
 import Color.Theme
 
-myTerminal ::String
+myTerminal :: String
 myTerminal = "alacritty"
 
 -- Whether focus follows the mouse pointer.
@@ -183,9 +184,6 @@ myStartupHook = do
 
 
 trayerColor = "0x" ++ tail (colorBack theme)
-
--- spawnOnOnce "2" browser
--- spawn "pcmanfm --desktop &"
 
 myEventHook :: Event -> X All
 myEventHook =

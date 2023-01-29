@@ -64,6 +64,7 @@ import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
+
   -- Utils
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
@@ -79,7 +80,7 @@ import Color.Theme
 
 * Variables
 #+begin_src haskell
-myTerminal ::String
+myTerminal :: String
 myTerminal = "alacritty"
 
 -- Whether focus follows the mouse pointer.
@@ -133,7 +134,6 @@ taskManager :: String
 taskManager = "btm"
 
 changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"
-
 
 #+end_src
 
@@ -215,9 +215,10 @@ mySB =
 
 * Startup Hook
 Startup hook
-Perform an arbitrary action each time xmonad starts or is restarted
-with mod-q.
+Perform an arbitrary action each time xmonad starts or is restarted with mod-q.
+
 `spawnOnce` is called only the first time xmonad is started
+
 `spawn` is called every time xmonad is started
 #+begin_src haskell
 
@@ -243,15 +244,11 @@ myStartupHook = do
 
 trayerColor = "0x" ++ tail (colorBack theme)
 
--- spawnOnOnce "2" browser
--- spawn "pcmanfm --desktop &"
-
 #+end_src
 
 
 * Event Hook
-Defines a custom handler function for X Events. The function should
-return (All True) if the default handler is to be run afterwards.
+Defines a custom handler function for X Events. The function should return (All True) if the default handler is to be run afterwards.
 
 #+begin_src haskell
 myEventHook :: Event -> X All
@@ -295,7 +292,7 @@ myManageHook =
 
 
 * Layout Hook
-The following layouts are supported
+The following layouts are used
 |----------------+--------------------+------------------------------------------------------------------+-----------|
 | layout         | name in status bar | description                                                      | resizable |
 |----------------+--------------------+------------------------------------------------------------------+-----------|
@@ -356,6 +353,7 @@ instance SetsAmbiguous OnlyTiled where
 
 
 * Keybindings
+To view a list of keybindings, press "M-F1".
 #+begin_src haskell
 
 myKeys conf =
