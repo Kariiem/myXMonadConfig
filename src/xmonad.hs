@@ -15,14 +15,11 @@ import XMonad.Layout.Spacing
 import XMonad.Layout.Decoration
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Grid
-import XMonad.Layout.MultiToggle
-import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.WindowArranger
 import XMonad.Layout.BorderResize
-import XMonad.Layout.PositionStoreFloat
 
   -- Actions
 import XMonad.Actions.SpawnOn
@@ -39,9 +36,7 @@ import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.WorkspaceHistory
 import XMonad.Hooks.WindowSwallowing
 import XMonad.Hooks.SetWMName
-import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
-import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
 
   -- Utils
@@ -81,21 +76,6 @@ myBorderWidth = 2
 defaultGapSize :: Integer
 defaultGapSize = 10
 
-fileManager :: String
-fileManager = "thunar"
-
-browser :: String
-browser = "microsoft-edge-dev"
-
-fileBrowser :: String
-fileBrowser = "thunar"
-
-pdfHistory :: String
-pdfHistory = "~/script/pdf_history"
-
-powerOpts :: String
-powerOpts = "~/script/powerOptions"
-
 doom_emacsclient :: String
 doom_emacsclient = "~/script/run_emacs doom doom-emacs"
 
@@ -105,10 +85,8 @@ vanilla_emacsclient = "~/script/run_emacs vanilla vanilla-emacs"
 dmenu_run :: String
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
 
-taskManager :: String
-taskManager = "btm"
-
-changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"
+sysMonitor :: String
+sysMonitor = "btm"
 
 myWorkspaces :: [String]
 myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::Int]
@@ -169,8 +147,7 @@ myStartupHook = do
   spawnOnce "sxhkd"
   spawnOnce "emacs --with-profile doom-emacs --daemon &"
   spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
-
-  spawnOnOnce "sys-mon" ("st -e btm")
+  spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
   spawn "killall trayer"
   spawnOnce "nm-applet"
   spawnOnce "picom"
@@ -257,14 +234,14 @@ myKeys conf =
     , ("M-S-c"        , addName "Kill the focused application"  $ kill1)
     , ("M-S-q"        , addName "Exit XMonad"                   $ io exitSuccess)
     , ("M-S-r"        , addName "Refresh XMonad"                $ refresh)
-    , ("M-S-t"        , addName "Change color theme"            $ spawn changeThemeScript)
     , ("M-S-b"        , addName "Show/Hide status bar"          $ sendMessage ToggleStruts)
     ]
     ++
     subTitle "Dmenu Scripts"
-    [ ("M-x"          , addName "Poweroff prompt "              $ spawn powerOpts)
+    [ ("M-S-t"        , addName "Change color theme"            $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/change_color_theme")
+    , ("M-x"          , addName "Poweroff prompt "              $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/power_options")
     , ("M-p"          , addName "Dmenu app launcher"            $ spawn dmenu_run)
-    , ("M-o"          , addName "Navigate your pdf history"     $ spawn pdfHistory)
+    , ("M-o"          , addName "Navigate your pdf history"     $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/pdf_history")
     ]
     ++
     subTitle "Applications"

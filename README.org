@@ -3,20 +3,25 @@
 #+property: header-args :tangle src/xmonad.hs
 
 * Table of contents :toc:
-- [[#imports][Imports]]
-- [[#variables][Variables]]
-- [[#workspaces][Workspaces]]
-- [[#scratchpads][Scratchpads]]
-- [[#log-hook][Log Hook]]
-  - [[#status-bar][Status bar]]
-- [[#startup-hook][Startup Hook]]
-- [[#event-hook][Event Hook]]
-- [[#manage-hook][Manage Hook]]
-- [[#layout-hook][Layout Hook]]
-- [[#keybindings][Keybindings]]
-- [[#main][Main]]
+- [[#xmonad][XMonad]]
+  - [[#imports][Imports]]
+  - [[#variables][Variables]]
+  - [[#workspaces][Workspaces]]
+  - [[#scratchpads][Scratchpads]]
+  - [[#log-hook][Log Hook]]
+  - [[#startup-hook][Startup Hook]]
+  - [[#event-hook][Event Hook]]
+  - [[#manage-hook][Manage Hook]]
+  - [[#layout-hook][Layout Hook]]
+  - [[#keybindings][Keybindings]]
+  - [[#main][Main]]
+- [[#xmobar][XMobar]]
+  - [[#utils][Utils]]
+  - [[#monitors][Monitors]]
+  - [[#main-1][Main]]
 
-* Imports
+* XMonad
+** Imports
 #+begin_src haskell
 
   -- Builtin
@@ -36,14 +41,11 @@ import XMonad.Layout.Spacing
 import XMonad.Layout.Decoration
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Grid
-import XMonad.Layout.MultiToggle
-import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.WindowArranger
 import XMonad.Layout.BorderResize
-import XMonad.Layout.PositionStoreFloat
 
   -- Actions
 import XMonad.Actions.SpawnOn
@@ -60,9 +62,7 @@ import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.WorkspaceHistory
 import XMonad.Hooks.WindowSwallowing
 import XMonad.Hooks.SetWMName
-import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
-import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
 
   -- Utils
@@ -78,7 +78,7 @@ import Color.Theme
 #+end_src
 
 
-* Variables
+** Variables
 #+begin_src haskell
 myTerminal :: String
 myTerminal = "alacritty"
@@ -106,21 +106,6 @@ myBorderWidth = 2
 defaultGapSize :: Integer
 defaultGapSize = 10
 
-fileManager :: String
-fileManager = "thunar"
-
-browser :: String
-browser = "microsoft-edge-dev"
-
-fileBrowser :: String
-fileBrowser = "thunar"
-
-pdfHistory :: String
-pdfHistory = "~/script/pdf_history"
-
-powerOpts :: String
-powerOpts = "~/script/powerOptions"
-
 doom_emacsclient :: String
 doom_emacsclient = "~/script/run_emacs doom doom-emacs"
 
@@ -130,14 +115,11 @@ vanilla_emacsclient = "~/script/run_emacs vanilla vanilla-emacs"
 dmenu_run :: String
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
 
-taskManager :: String
-taskManager = "btm"
-
-changeThemeScript = "$XDG_CONFIG_HOME/xmonad/scripts/select-theme"
-
+sysMonitor :: String
+sysMonitor = "btm"
 #+end_src
 
-* Workspaces
+** Workspaces
 Workspaces are the tags that appear in the status bar, each tag corresponds to virtual workspace.
 #+begin_src haskell
 myWorkspaces :: [String]
@@ -146,7 +128,7 @@ myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::In
 #+end_src
 
 
-* Scratchpads
+** Scratchpads
 #+begin_src haskell
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -161,7 +143,7 @@ scratchpads =
 #+end_src
 
 
-* Log Hook
+** Log Hook
 #+begin_src haskell
 
 myLogHook :: X ()
@@ -173,7 +155,7 @@ myFadeHook = composeAll []
 
 #+end_src
 
-** Status bar
+*** Status bar
 This section defines a pretty printer (PP) for the status bar.
 
 #+begin_src haskell
@@ -213,7 +195,7 @@ mySB =
 #+end_src
 
 
-* Startup Hook
+** Startup Hook
 Startup hook
 Perform an arbitrary action each time xmonad starts or is restarted with mod-q.
 
@@ -228,8 +210,7 @@ myStartupHook = do
   spawnOnce "sxhkd"
   spawnOnce "emacs --with-profile doom-emacs --daemon &"
   spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
-
-  spawnOnOnce "sys-mon" ("st -e btm")
+  spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
   spawn "killall trayer"
   spawnOnce "nm-applet"
   spawnOnce "picom"
@@ -247,7 +228,7 @@ trayerColor = "0x" ++ tail (colorBack theme)
 #+end_src
 
 
-* Event Hook
+** Event Hook
 Defines a custom handler function for X Events. The function should return (All True) if the default handler is to be run afterwards.
 
 #+begin_src haskell
@@ -260,7 +241,7 @@ myEventHook =
 #+end_src
 
 
-* Manage Hook
+** Manage Hook
 Execute arbitrary actions and WindowSet manipulations when managing
 a new window. You can use this to, for example, always float a
 particular program, or have a client always appear on a particular
@@ -291,7 +272,7 @@ myManageHook =
 #+end_src
 
 
-* Layout Hook
+** Layout Hook
 The following layouts are used
 |----------------+--------------------+------------------------------------------------------------------+-----------|
 | layout         | name in status bar | description                                                      | resizable |
@@ -352,7 +333,7 @@ instance SetsAmbiguous OnlyTiled where
 #+end_src
 
 
-* Keybindings
+** Keybindings
 To view a list of keybindings, press "M-F1".
 #+begin_src haskell
 
@@ -363,14 +344,14 @@ myKeys conf =
     , ("M-S-c"        , addName "Kill the focused application"  $ kill1)
     , ("M-S-q"        , addName "Exit XMonad"                   $ io exitSuccess)
     , ("M-S-r"        , addName "Refresh XMonad"                $ refresh)
-    , ("M-S-t"        , addName "Change color theme"            $ spawn changeThemeScript)
     , ("M-S-b"        , addName "Show/Hide status bar"          $ sendMessage ToggleStruts)
     ]
     ++
     subTitle "Dmenu Scripts"
-    [ ("M-x"          , addName "Poweroff prompt "              $ spawn powerOpts)
+    [ ("M-S-t"        , addName "Change color theme"            $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/change_color_theme")
+    , ("M-x"          , addName "Poweroff prompt "              $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/power_options")
     , ("M-p"          , addName "Dmenu app launcher"            $ spawn dmenu_run)
-    , ("M-o"          , addName "Navigate your pdf history"     $ spawn pdfHistory)
+    , ("M-o"          , addName "Navigate your pdf history"     $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/pdf_history")
     ]
     ++
     subTitle "Applications"
@@ -472,7 +453,7 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 #+end_src
 
 
-* Main
+** Main
 A structure containing your configuration settings, overriding fields in the default config. Any you don't override, will use the defaults defined in xmonad/XMonad/Config.hs
 
 #+begin_src haskell
@@ -501,5 +482,143 @@ defaults = def
   , logHook = myLogHook
   , startupHook = myStartupHook
   }
+
+#+end_src
+------
+* XMobar
+XMobar is a status bar written in haskell and can be used as a library for creating custom status bars.
+
+
+#+begin_src haskell :tangle src/xmobar.hs
+
+  -- Builtin
+import Text.Printf as P
+
+  --
+import Xmobar
+
+  -- MyLib
+import Color.Theme
+
+#+end_src
+** Utils
+#+begin_src haskell :tangle src/xmobar.hs
+
+box :: String -> String -> String -> Int -> (Int, Int, Int, Int) -> String
+box str ty color width (mt, mb, ml, mr) =
+  P.printf "<box type=%s width=%d mt=%d mb=%d ml=%d mr=%d color=%s > %s </box> " ty width mt mb ml mr color str
+
+
+
+#+end_src
+** Monitors
+
+#+begin_src haskell :tangle src/xmobar.hs
+
+class MyMonitor a where
+  def :: a -> [(String, String)]
+  def _ = []
+
+  monitorSpecific :: a -> [(String, String)]
+  monitorSpecific _ = []
+
+  toArgs :: a -> [String]
+  toArgs a = concatMap (\(x, y) -> [x, y]) (def a ++ monitorSpecific a)
+
+#+end_src
+*** Battery
+#+begin_src haskell :tangle src/xmobar.hs
+
+data MyBattery = MyBattery
+battery = BatteryP ["BAT1"] (toArgs MyBattery) 360
+
+instance MyMonitor MyBattery where
+  def =
+    const
+      [ ("-t", "<acstatus> <left>%"),
+        ("-L", "20"),
+        ("-H", "80"),
+        ("-p", "3")
+      ]
+  monitorSpecific =
+    const
+      [ ("--", ""),
+        ("-O", "<fc=#0088aa>On</fc>"),
+        ("-i", "<fc=#0088aa><fn=1>\xf583</fn></fc>"),
+        ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),
+        ("-p", "green"),
+        ("-A", "30"),
+        ("-a", "notify-send -u critical 'Battery is running out!'")
+      ]
+
+#+end_src
+*** Brightness
+#+begin_src haskell :tangle src/xmobar.hs
+
+data MyBrightness = MyBrightness
+brightness = Brightness (toArgs MyBrightness) 10
+
+instance MyMonitor MyBrightness where
+  def = const [("-t", "<bar>")]
+  monitorSpecific =
+    const
+      [ ("--", ""),
+        ("-D", "intel_backlight"),
+        ("-C", "actual_brightness"),
+        ("-M", "max_brightness")
+      ]
+#+end_src
+*** Memory
+#+begin_src haskell :tangle src/xmobar.hs
+
+data MyMemory = MyMemory
+memory = Memory (toArgs MyMemory) 20
+
+instance MyMonitor MyMemory where
+  def = const [("-t", "mem: \xf233 <used>Mb (<usedratio>%)")]
+  monitorSpecific = const []
+
+#+end_src
+** Main
+#+begin_src haskell :tangle src/xmobar.hs
+
+main :: IO ()
+main = xmobar config
+
+config :: Config
+config =
+  defaultConfig
+    { font = "Hack 12", -- "Noto Color Emoji 10"
+      position = TopHM 30 10 10 5 5, -- Height, left/right margins, top/down margins
+      additionalFonts = ["Hack 18"],
+      allDesktops = True,
+      alpha = 255,
+      bgColor = colorBack theme,
+      fgColor = colorFore theme,
+      iconRoot = "/home/karim/.config/xmonad/icons",
+      commands =
+        [ Run UnsafeXMonadLog,
+          Run memory,
+          Run kbd,
+          Run brightness,
+          Run battery,
+          Run datetime,
+          Run trayer
+
+       ],
+      template =
+        " <icon=haskell.xpm/> %UnsafeXMonadLog% }{ \
+        \ %battery% | %bright% | %kbd% | %date% "
+          ++ box "%memory%" "Bottom" (colorBRed theme) 3 (0, 2, 0, 0)
+          ++ " %trayerpad% ",
+      alignSep = "}{",
+      sepChar  = "%"
+    }
+trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
+
+kbd = Kbd []
+
+datetime = Date "%a %_d %b %Y <fc=#ee9a00>%I:%M</fc>" "date" 10
+
 
 #+end_src
