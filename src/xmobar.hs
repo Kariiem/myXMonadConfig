@@ -1,7 +1,7 @@
   -- Builtin
 import Text.Printf as P
 
-  --
+  -- Basic
 import Xmobar
 
   -- MyLib
@@ -11,12 +11,18 @@ box :: String -> String -> String -> Int -> (Int, Int, Int, Int) -> String
 box str ty color width (mt, mb, ml, mr) =
   P.printf "<box type=%s width=%d mt=%d mb=%d ml=%d mr=%d color=%s > %s </box> " ty width mt mb ml mr color str
 
+colorize ::String -> String ->String
+colorize color str = "<fc=" ++ color ++ ">" ++ str ++"</fc>"
+
 class MyMonitor a where
   def :: a -> [(String, String)]
-  def _ = []
+  def = const []
 
   monitorSpecific :: a -> [(String, String)]
-  monitorSpecific _ = []
+  monitorSpecific  = const []
+
+  monitorTemplate :: a -> String
+  monitorTemplate = const ""
 
   toArgs :: a -> [String]
   toArgs a = concatMap (\(x, y) -> [x, y]) (def a ++ monitorSpecific a)
@@ -36,12 +42,13 @@ instance MyMonitor MyBattery where
     const
       [ ("--", ""),
         ("-O", "<fc=#0088aa>On</fc>"),
-        ("-i", "<fc=#0088aa><fn=1>\xf583</fn></fc>"),
+        ("-i", "<fc=#0088aa><fn=1>\xf492</fn></fc>"), -- \xf583
         ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),
         ("-p", "green"),
         ("-A", "30"),
         ("-a", "notify-send -u critical 'Battery is running out!'")
       ]
+  monitorTemplate = const $ colorize (colorYellow theme) $ box "%battery%"  "Bottom" (colorYellow theme) 3 (0,2,0,0)
 
 data MyBrightness = MyBrightness
 brightness = Brightness (toArgs MyBrightness) 10
@@ -55,13 +62,23 @@ instance MyMonitor MyBrightness where
         ("-C", "actual_brightness"),
         ("-M", "max_brightness")
       ]
+  monitorTemplate = const $ colorize (colorGreen theme) $ box "%bright%" "Bottom" (colorBPurple theme) 3 (0,2,0,0)
 
 data MyMemory = MyMemory
 memory = Memory (toArgs MyMemory) 20
 
 instance MyMonitor MyMemory where
   def = const [("-t", "mem: \xf233 <used>Mb (<usedratio>%)")]
-  monitorSpecific = const []
+  monitorTemplate = const $ colorize (colorCyan theme) $ box "%memory%" "Bottom" (colorPurple theme) 3 (0, 2, 0, 0)
+
+trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
+trayerTemplate = "%trayerpad%"
+
+datetime = Date "<fc=#ff6608>%a</fc> %_d/%-m/%Y <fc=#30d5c8>%I:%M</fc> %P" "date" 10
+dateTemplate = colorize (colorBGreen theme) $ box "%date%" "Bottom" (colorBRed theme) 3 (0,2,0,0)
+
+kbd = Kbd []
+kbdTemplate = colorize (colorYellow theme) $ box "%kbd%" "Bottom" (colorOrange theme) 3 (0,2,0,0)
 
 main :: IO ()
 main = xmobar config
@@ -69,7 +86,17 @@ main = xmobar config
 config :: Config
 config =
   defaultConfig
-    { font = "Hack 12", -- "Noto Color Emoji 10"
+    {
+      template =
+        " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
+        ++ monitorTemplate MyBrightness
+        ++ monitorTemplate MyMemory
+        ++ kbdTemplate
+        ++ monitorTemplate MyBattery
+        ++ dateTemplate
+        ++ trayerTemplate,
+
+      font = "Hack 12", -- "Noto Color Emoji 10"
       position = TopHM 30 10 10 5 5, -- Height, left/right margins, top/down margins
       additionalFonts = ["Hack 18"],
       allDesktops = True,
@@ -85,18 +112,7 @@ config =
           Run battery,
           Run datetime,
           Run trayer
-
        ],
-      template =
-        " <icon=haskell.xpm/> %UnsafeXMonadLog% }{ \
-        \ %battery% | %bright% | %kbd% | %date% "
-          ++ box "%memory%" "Bottom" (colorBRed theme) 3 (0, 2, 0, 0)
-          ++ " %trayerpad% ",
       alignSep = "}{",
       sepChar  = "%"
     }
-trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
-
-kbd = Kbd []
-
-datetime = Date "%a %_d %b %Y <fc=#ee9a00>%I:%M</fc>" "date" 10
