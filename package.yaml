@@ -6,7 +6,7 @@ author:              "Karim Taha"
 copyright:           "2022 Karim Taha"
 
 extra-source-files:
-- README.md
+- README.org
 - CHANGELOG.md
 
 # Metadata used when publishing your package

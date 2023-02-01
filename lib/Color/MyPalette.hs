@@ -109,7 +109,7 @@ instance Color NordLight where
   colorBack = const "#E5E9F0"
   colorFore = const "#3B4252"
 
-  colorBlack = const "#60728C"
+  colorBlack = const "#1e1e1e"
   colorGrey = const "#B8C5DB"
   colorWhite = const "#485163"
 
