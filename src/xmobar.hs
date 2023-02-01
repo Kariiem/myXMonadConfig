@@ -54,7 +54,12 @@ data MyBrightness = MyBrightness
 brightness = Brightness (toArgs MyBrightness) 10
 
 instance MyMonitor MyBrightness where
-  def = const [("-t", "<bar>")]
+  def = const
+          [ ("-t", "<bar>"),
+            ("-W", "8"),
+            ("-b", "\x1fb8f"),
+            ("-f", "\x1fb39")
+          ]
   monitorSpecific =
     const
       [ ("--", ""),
@@ -62,7 +67,7 @@ instance MyMonitor MyBrightness where
         ("-C", "actual_brightness"),
         ("-M", "max_brightness")
       ]
-  monitorTemplate = const $ colorize (colorGreen theme) $ box "%bright%" "Bottom" (colorBPurple theme) 3 (0,2,0,0)
+  monitorTemplate = const $ "<fc=#ffffff><icon=brightness.xpm/></fc>" ++ (colorize (colorGreen theme) $ box "%bright%" "Bottom" (colorBPurple theme) 3 (0,2,0,0))
 
 data MyMemory = MyMemory
 memory = Memory (toArgs MyMemory) 20
