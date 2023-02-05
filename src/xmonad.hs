@@ -94,10 +94,10 @@ dmenu_run :: String
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
 
 sysMonitor :: String
-sysMonitor = "btm"
+sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["home","fecu","www","docs","dev","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["home","fecu","www","docs","dev","xmonad","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -154,7 +154,9 @@ customXConfig = myXConfig { layoutHook = Layout $ layoutHook myXConfig }
 
 myStartupHook :: X ()
 myStartupHook = do
-  return () >> yadCheckKeymap customXConfig $ concatMap (\(KeySection _ keys) -> keys) $ myKeysSections customXConfig
+  return () >> yadCheckKeymap customXConfig
+             $ concatMap (\(KeySection _ keys) -> keys)
+             $ myKeysSections customXConfig
   setWMName "LG3D"
   spawnOnce "sxhkd"
   spawnOnce "emacs --with-profile doom-emacs --daemon &"
@@ -186,14 +188,14 @@ myManageHook =
   composeAll
     [ manageSpawn,
       insertPosition Below Newer,
-      placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5)), -- simpleSmart -- (smart (0.5,0.5))
       namedScratchpadManageHook scratchpads,
       className =? "jetbrains-idea-ce" --> doFloat,
       className =? "dialog" --> doFloat,
       className =? "download" --> doFloat,
       className =? "notification" --> doFloat,
       className =? "Xmessage" --> doFloat,
-      className =? "Yad" -->doCenterFloat
+      className =? "Yad" -->doCenterFloat,
+      placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
     ]
 
 mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
@@ -323,18 +325,22 @@ myKeysSections conf =
                , ("M-4"          , addName ("\tGoto workspace 4")                 $ windows $ W.greedyView $ ws !! 3)
                , ("M-5"          , addName ("\tGoto workspace 5")                 $ windows $ W.greedyView $ ws !! 4)
                , ("M-6"          , addName ("\tGoto workspace 6")                 $ windows $ W.greedyView $ ws !! 5)
+               , ("M-7"          , addName ("\tGoto workspace 7")                 $ windows $ W.greedyView $ ws !! 6)
                , ("M-S-1"        , addName ("\tShift window to workspace 1")      $ windows $ W.shift $ ws !! 0)
                , ("M-S-2"        , addName ("\tShift window to workspace 2")      $ windows $ W.shift $ ws !! 1)
                , ("M-S-3"        , addName ("\tShift window to workspace 3")      $ windows $ W.shift $ ws !! 2)
                , ("M-S-4"        , addName ("\tShift window to workspace 4")      $ windows $ W.shift $ ws !! 3)
                , ("M-S-5"        , addName ("\tShift window to workspace 5")      $ windows $ W.shift $ ws !! 4)
                , ("M-S-6"        , addName ("\tShift window to workspace 6")      $ windows $ W.shift $ ws !! 5)
+               , ("M-S-7"        , addName ("\tShift window to workspace 7")      $ windows $ W.shift $ ws !! 6)
                , ("M-C-1"        , addName ("\tCopy window to workspace 1")       $ windows $ copy $ ws !! 0)
                , ("M-C-2"        , addName ("\tCopy window to workspace 2")       $ windows $ copy $ ws !! 1)
                , ("M-C-3"        , addName ("\tCopy window to workspace 3")       $ windows $ copy $ ws !! 2)
                , ("M-C-4"        , addName ("\tCopy window to workspace 4")       $ windows $ copy $ ws !! 3)
                , ("M-C-5"        , addName ("\tCopy window to workspace 5")       $ windows $ copy $ ws !! 4)
                , ("M-C-6"        , addName ("\tCopy window to workspace 6")       $ windows $ copy $ ws !! 5)
+               , ("M-C-7"        , addName ("\tCopy window to workspace 7")       $ windows $ copy $ ws !! 6)
+
                ]
   , KeySection "Gap Controls"
                [ ("M-s i"        , addName "\tIncrease gap size by 5 pixels"      $ incScreenWindowSpacing 5)

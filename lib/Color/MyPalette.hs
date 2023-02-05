@@ -33,7 +33,7 @@ instance Color Dracula where
 
   colorBlack = const "#1E2029"
   colorGrey = const "#565761"
-  colorWhite = const "#e2e2dc"
+  colorWhite = const "#f8f8f2"
 
   colorBlue = const "#0189cc"
   colorBBlue = const "#61bfff"
@@ -57,15 +57,15 @@ instance Color DoomOne where
   colorBack = const "#282c34"
   colorFore = const "#bbc2cf"
 
-  colorBlack = const "#1E2029"
+  colorBlack = const "#1b2229"
   colorGrey = const "#3f444a"
-  colorWhite = const "#e2e2dc"
+  colorWhite = const "dfdfdf"
 
-  colorBlue = const "#2257A0"
+  colorBlue = const "#2257a0"
   colorBBlue = const "#51afef"
 
   colorCyan = const "#5699af"
-  colorBCyan = const "#46D9FF"
+  colorBCyan = const "#46d9ff"
 
   colorGreen = const "#98be65"
   colorBGreen = const "#4db5bd"
@@ -83,21 +83,21 @@ instance Color Nord where
   colorBack = const "#2e3440"
   colorFore = const "#eceff4"
 
-  colorBlack = const "#191C25"
-  colorGrey = const "#434C5E"
-  colorWhite = const "#F0F4FC"
+  colorBlack = const "#191c25"
+  colorGrey = const "#434c5e"
+  colorWhite = const "#f0f4fc"
 
   colorGreen = const "#a3be8c"
-  colorBGreen = const "#8FBCBB"
+  colorBGreen = const "#8fbcbb"
 
-  colorBlue = const "#5E81AC"
-  colorBBlue = const "#81A1C1"
+  colorBlue = const "#5e81ac"
+  colorBBlue = const "#81a1c1"
 
   colorCyan = const "#507681"
-  colorBCyan = const "#88C0D0"
+  colorBCyan = const "#88c0d0"
 
   colorRed = const "#bf616a"
-  colorBRed = const "#D08770"
+  colorBRed = const "#d08770"
 
   colorPurple = const "#b48ead"
   colorBPurple = const "#5d80ae"
@@ -106,27 +106,27 @@ instance Color Nord where
   colorYellow = const "#ebcb8b"
 
 instance Color NordLight where
-  colorBack = const "#E5E9F0"
-  colorFore = const "#3B4252"
+  colorBack = const "#e5e9f0"
+  colorFore = const "#3b4252"
 
-  colorBlack = const "#1e1e1e"
-  colorGrey = const "#B8C5DB"
+  colorBlack = const "#f0f4fc"
+  colorGrey = const "#b8c5db"
   colorWhite = const "#485163"
 
-  colorBlue = const "#5272AF"
-  colorBBlue = const "#3B6EA8"
+  colorBlue = const "#5272af"
+  colorBBlue = const "#3b6ea8"
 
-  colorCyan = const "#2C7088"
-  colorBCyan = const "#398EAC"
+  colorCyan = const "#2c7088"
+  colorBCyan = const "#398eac"
 
-  colorGreen = const "#4F894C"
-  colorBGreen = const "#29838D"
+  colorGreen = const "#4f894c"
+  colorBGreen = const "#29838d"
 
-  colorRed = const "#99324B"
-  colorBRed = const "#AC4426"
+  colorRed = const "#99324b"
+  colorBRed = const "#ac4426"
 
   colorPurple = const "#97365B"
   colorBPurple = const "#842879"
 
-  colorOrange = const "#AC4426"
-  colorYellow = const "#9A7500"
+  colorOrange = const "#ac4426"
+  colorYellow = const "#9a7500"
