@@ -368,9 +368,11 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
     , ((modm .|. shiftMask, button1)   , \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
     ]
 
+yad = "yad --undecorated --no-buttons --text-info --text-align=left --fontname=\"Hack 12\" --fore="
+    ++ colorBBlue theme ++ " --back=" ++ colorBlack theme ++ " --geometry=1400x800"
+
 pipeToYad str = do
-            yadPipe <- spawnPipe $ "yad --text-info --title='XMonad Keybindings Help' --borders=1 --text-align=left --no-buttons --fontname=\"Hack 12\" --fore="
-                    ++ colorBBlue theme ++ " --back=" ++ colorBlack theme ++ " --geometry=1400x800"
+            yadPipe <- spawnPipe yad
             hPutStrLn yadPipe str
             hClose yadPipe
             return ()

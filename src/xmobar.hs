@@ -19,6 +19,8 @@ colorize color str = "<fc=" ++ color ++ ">" ++ str ++"</fc>"
 fontSize :: Int->String->String
 fontSize i str = "<fn="++show i++ ">"++ str ++ "</fn>"
 
+action command str = "<action=`"++command ++ "`>" ++ str ++"</action>"
+
 fontList = [ (1,"Hack Bold 14")
            , (2,"Hack Bold Italic 14")
            , (3,"Hack Bold 12")
@@ -57,9 +59,9 @@ instance MyMonitor MyBattery where
   monitorSpecific =
     const
       [ ("--", ""),
-        ("-O", "<fc=#0088aa>On</fc>"),
-        ("-i", "\x1F50C"), -- \xf583"
-        ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),
+        ("-i", "<fc=#0088aa>Full</fc>"), -- idle AC, fully charged
+        ("-O", "\x1F50C"), -- \xf583"   -- On AC, charging
+        ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),  -- off AC, discharging
         ("-p", "green"),
         ("-A", "30"),
         ("-a", "notify-send -u critical 'Battery is running out!'")
@@ -76,7 +78,7 @@ instance MyMonitor MyBrightness where
   def =
     const
       [ ("-t", "<bar>"),
-        ("-W", "5"),
+        ("-W", "10"),
         ("-b", " "), -- \x1fb8f
         ("-f", "\x1fb39") 
       ]
@@ -89,8 +91,8 @@ instance MyMonitor MyBrightness where
       ]
   monitorTemplate = const
                   $ fontSize 6
-                  $ colorize "#ff647f" -- "#fffa55"
-                  $ dtBox "%bright%" "Bottom" "#ff647f" -- <fn=1>\x1f317</fn>
+                  $ colorize "#dfaa11" -- "#fffa55"
+                  $ dtBox "%bright%" "Bottom" "#dfaa11" -- <fn=1>\x1f317</fn>
 
 data MyCpu = MyCpu
 cpu = MultiCpu (toArgs MyCpu) 50
@@ -104,6 +106,7 @@ instance MyMonitor MyCpu where
         ("-h", "red")
       ]
   monitorTemplate = const
+                  $ action "st -e btop"
                   $ fontSize 6
                   $ colorize "#ff8855"
                   $ dtBox "<fn=1>\xf26c</fn>  cpu:%multicpu%" "Bottom" "#ff8855"
@@ -116,7 +119,7 @@ instance MyMonitor MyTemp where
       [ ("-t", "temp:<avg>\x2103"),
         ("-L", "60"),
         ("-H", "80"),
-        ("-l", "#dfaa11"),
+        ("-l", "#ff647f"),
         ("-h", "red")
       ]
   monitorSpecific =
@@ -127,8 +130,8 @@ instance MyMonitor MyTemp where
       ]
   monitorTemplate = const
                   $ fontSize 6
-                  $ colorize "#dfaa11"
-                  $ dtBox "%multicoretemp%" "Bottom" "#dfaa11"
+                  $ colorize "#ff647f"
+                  $ dtBox "%multicoretemp%" "Bottom" "#ff647f"
 
 data MyMemory = MyMemory
 memory = Memory (toArgs MyMemory) 20
@@ -140,7 +143,13 @@ instance MyMonitor MyMemory where
                   $ colorize "#ff6600"
                   $ dtBox "mem:%memory%" "Bottom" "#ff6600"
 
-trayer = Com "/bin/sh" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
+checkUpdates = Com "/bin/bash" ["-c","{ checkupdates & yay -Qua; } | wc -l"] "updates" 36000
+checkUpdatesTemplate = action "$XDG_CONFIG_HOME/xmonad/scripts/yadUpdates"
+                $ fontSize 6
+                $ colorize "#ff0000"
+                $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
+
+trayer = Com "/bin/bash" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
 trayerTemplate = "%trayerpad%"
 
 datetime = Date "%b %d %Y-<fc=#00d5c8>%I:%M</fc>" "date" 10
@@ -162,13 +171,14 @@ config =
     {
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
-        ++ monitorTemplate MyCpu
-        ++ monitorTemplate MyMemory
-        ++ monitorTemplate MyTemp
+        ++ checkUpdatesTemplate
         ++ monitorTemplate MyBrightness
+        ++ monitorTemplate MyTemp
+        ++ monitorTemplate MyMemory
+        ++ monitorTemplate MyCpu
+        ++ dateTemplate
         ++ kbdTemplate
         ++ monitorTemplate MyBattery
-        ++ dateTemplate
         ++ trayerTemplate,
 
       font = "Hack Bold Italic 12",
@@ -189,6 +199,7 @@ config =
         , Run trayer
         , Run cpu
         , Run temperature
+        , Run checkUpdates
        ],
       alignSep = "}{",
       sepChar  = "%"
