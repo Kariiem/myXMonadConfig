@@ -1,9 +1,14 @@
 #!/bin/bash
+SCRIPT=$(realpath "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
 
 choice=$(printf 'Dracula\nDoomOne\nNord\nNordLight'|dmenu -i -p "Select Theme: ")
 if [ -z "$choice" ]; then
-    $choice="Dracula"
+    echo "No Choice"
+    choice="Dracula"
 fi
-echo $choice > $XDG_CONFIG_HOME/xmonad/theme.txt
+echo -n $choice > $HOME/.local/theme.txt
+killall xmobar; xmonad --restart
+$SCRIPTPATH/run_emacs "vanilla" "vanilla-emacs" -e "(my-load-theme)"
 
-killall xmobar; xmonad --recompile; xmonad --restart
+

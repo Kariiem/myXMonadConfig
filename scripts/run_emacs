@@ -1,0 +1,29 @@
+#!/bin/bash
+#   $1: server name : used as `emacsclient -s $1`
+#   $2: profile name : used as `emacs --with-profile $2 --daemon &`
+function run_emacs {
+  if [ "$1" != "" ];
+  then
+    server_name="${1}"
+    args="${@:3}"
+  else
+    server_name="doom"
+    args=""
+  fi
+  profile="$2"
+
+  if ! emacsclient -s ${server_name} -a 'false' -e 'nil'
+  then
+    emacs --with-profile=${profile} --daemon 
+    echo ">> Server should have started. Trying to connect..."
+  fi
+  
+  emacsclient -s ${server_name} ${args}
+}
+function doom {
+	run_emacs "doom" "doom-emacs" 
+}
+function vanilla {
+	run_emacs "vanilla" "vanilla-emacs"
+}
+run_emacs "$@"

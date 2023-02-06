@@ -84,13 +84,13 @@ myBorderWidth = 2
 defaultGapSize :: Integer
 defaultGapSize = 10
 
-doom_emacsclient :: String
-doom_emacsclient = "~/script/run_emacs doom doom-emacs"
+scriptsDir = "$XDG_CONFIG_HOME/xmonad/scripts/"
+doomEmacsclientScript = scriptsDir ++ "run_emacs doom doom-emacs -c" -- `-c` opens a new frame
+vanillaEmacsclientScript = scriptsDir ++ "run_emacs vanilla vanilla-emacs -c"
+changeColorScript  = scriptsDir ++ "change_color_theme"
+pdfHistoryScript = scriptsDir ++ "pdf_history"
+powerOptsScript = scriptsDir ++ "power_options"
 
-vanilla_emacsclient :: String
-vanilla_emacsclient = "~/script/run_emacs vanilla vanilla-emacs"
-
-dmenu_run :: String
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
 
 sysMonitor :: String
@@ -119,7 +119,7 @@ myFadeHook = composeAll []
 myPP :: PP
 myPP =
   def
-    { ppCurrent = xmobarColor (colorRed theme) "",
+    { ppCurrent = xmobarColor (colorRed theme) "" . xmobarBorder "Bottom" (colorRed theme) 0  ,
       ppUrgent = xmobarColor (colorGreen theme) (colorBPurple theme),
       ppLayout = xmobarFont 5 . xmobarColor (colorBPurple theme) "" ,
       ppSep = " ",
@@ -264,15 +264,15 @@ myKeysSections conf =
                , ("M-S-b"        , addName "\tShow/Hide status bar"          $ sendMessage ToggleStruts)
                ]
   , KeySection "Dmenu Scripts"
-               [ ("M-S-t"        , addName "\tChange color theme"            $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/change_color_theme")
-               , ("M-x"          , addName "\tPoweroff prompt "              $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/power_options")
+               [ ("M-S-t"        , addName "\tChange color theme"            $ spawn changeColorScript )
+               , ("M-x"          , addName "\tPoweroff prompt "              $ spawn powerOptsScript)
                , ("M-p"          , addName "\tDmenu app launcher"            $ spawn dmenu_run)
-               , ("M-o"          , addName "\tNavigate your pdf history"     $ spawn "$XDG_CONFIG_HOME/xmonad/scripts/pdf_history")
+               , ("M-o"          , addName "\tNavigate your pdf history"     $ spawn pdfHistoryScript)
                ]
   , KeySection "Applications"
                [ ("M-S-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
-               , ("M-d"          , addName "\tLaunch Doom Emacs"                        $ spawn doom_emacsclient)
-               , ("M-v"          , addName "\tLaunch vanilla Emacs"                     $ spawn vanilla_emacsclient)
+               , ("M-d"          , addName "\tLaunch Doom Emacs"                        $ spawn doomEmacsclientScript)
+               , ("M-v"          , addName "\tLaunch vanilla Emacs"                     $ spawn vanillaEmacsclientScript)
                ]
   , KeySection "Layout Controls"
                [ ("M-S-<Tab>"    , addName "\tReset the window layout"             $ setLayout $ layoutHook conf)

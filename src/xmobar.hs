@@ -143,7 +143,7 @@ instance MyMonitor MyMemory where
                   $ colorize "#ff6600"
                   $ dtBox "mem:%memory%" "Bottom" "#ff6600"
 
-checkUpdates = Com "/bin/bash" ["-c","{ checkupdates & yay -Qua; } | wc -l"] "updates" 36000
+checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
 checkUpdatesTemplate = action "$XDG_CONFIG_HOME/xmonad/scripts/yadUpdates"
                 $ fontSize 6
                 $ colorize "#ff0000"

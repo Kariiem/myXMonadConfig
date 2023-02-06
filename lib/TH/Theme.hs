@@ -6,7 +6,7 @@ import System.IO
 
 retrieveThemeName :: Q Exp
 retrieveThemeName = do
-  addDependentFile "theme.txt"
+  addDependentFile "/home/karim/.local/theme.txt"
   runIO $ do
-    name <- withFile "theme.txt" ReadMode hGetLine
+    name <- withFile "/home/karim/.local/theme.txt" ReadMode hGetLine
     return $ LitE (StringL name)
