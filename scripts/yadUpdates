@@ -1,11 +1,12 @@
 #!/bin/bash
+
 #NEWLINE=$'\n'
 #updates="`checkupdates` $NEWLINE`yay -Qua`"
 updates=`{ checkupdates ; yay -Qua; }`
 updates_count=`echo "$updates" | wc -l` 
 echo "updates count:" $updates_count
 
-packages_info=`echo  "${updates}" | awk '{print " False " NR " " $1 " " $2 " " $NF}'`
+packages_info=`echo  "${updates}" | awk '{print "False",NR,$1,$2,$NF}'`
 
 ignored_packages=`yad --geometry=1400x800 --list --checklist \
             --column="Ignore" \

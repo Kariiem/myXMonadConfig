@@ -1,6 +1,7 @@
 #!/bin/bash
 #   $1: server name : used as `emacsclient -s $1`
 #   $2: profile name : used as `emacs --with-profile $2 --daemon &`
+
 function run_emacs {
   if [ "$1" != "" ];
   then
