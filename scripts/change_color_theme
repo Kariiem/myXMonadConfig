@@ -4,12 +4,9 @@ SCRIPT=$(realpath "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
 choice=$(printf 'Dracula\nDoomOne\nNord\nNordLight'|dmenu -i -p "Select Theme: ")
-if [ -z "$choice" ]; then
-    echo "No Choice"
-    choice="Dracula"
+if [ ! -z "$choice" ]; then
+    echo "choice non empty"
+    echo -n $choice > $HOME/.local/theme.txt
+    killall xmobar; xmonad --restart
+    $SCRIPTPATH/run_emacs "vanilla" "vanilla-emacs" -e "(my-load-theme)"
 fi
-echo -n $choice > $HOME/.local/theme.txt
-killall xmobar; xmonad --restart
-$SCRIPTPATH/run_emacs "vanilla" "vanilla-emacs" -e "(my-load-theme)"
-
-
