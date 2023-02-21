@@ -149,14 +149,15 @@ mySB =
   statusBarProp "xmobar" $
     copiesPP (xmobarFont 4 . xmobarColor (colorBlack theme) "") myPP >>= clickablePP
 
-customXConfig :: XConfig Layout
-customXConfig = myXConfig { layoutHook = Layout $ layoutHook myXConfig }
-
 myStartupHook :: X ()
 myStartupHook = do
-  return () >> yadCheckKeymap customXConfig
-             $ concatMap (\(KeySection _ keys) -> keys)
-             $ myKeysSections customXConfig
+  -- return () >> yadCheckKeymap customXConfig
+  --            $ concatMap (\(KeySection _ keys) -> keys)
+  --            $ myKeysSections customXConfig -- customXConfig = myXConfig {layoutHook = Layout $ layoutHook myXConfig}
+  -- this is equivalent to the above, using the <*> operator over functions, which acts as the `S` combinator.
+  return () >> yadCheckKeymap
+               <*> (concatMap (\(KeySection _ keys) ->keys) . myKeysSections)
+               $ myXConfig {layoutHook = Layout $ layoutHook myXConfig}
   setWMName "LG3D"
   spawnOnce "sxhkd"
   spawnOnce "emacs --with-profile doom-emacs --daemon &"
