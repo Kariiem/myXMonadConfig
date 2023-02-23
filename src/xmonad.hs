@@ -90,7 +90,7 @@ vanillaEmacsclientScript = scriptsDir ++ "run_emacs vanilla vanilla-emacs -c"
 changeColorScript  = scriptsDir ++ "change_color_theme"
 pdfHistoryScript = scriptsDir ++ "pdf_history"
 powerOptsScript = scriptsDir ++ "power_options"
-
+dictionaryScript= scriptsDir ++ "def"
 dmenu_run = "~/Suckless/bin/dmenu_run_history"
 
 sysMonitor :: String
@@ -264,16 +264,17 @@ myKeysSections conf =
                , ("M-S-r"        , addName "\tRefresh XMonad"                $ refresh)
                , ("M-S-b"        , addName "\tShow/Hide status bar"          $ sendMessage ToggleStruts)
                ]
-  , KeySection "Dmenu Scripts"
-               [ ("M-S-t"        , addName "\tChange color theme"            $ spawn changeColorScript )
-               , ("M-x"          , addName "\tPoweroff prompt "              $ spawn powerOptsScript)
-               , ("M-p"          , addName "\tDmenu app launcher"            $ spawn dmenu_run)
-               , ("M-o"          , addName "\tNavigate your pdf history"     $ spawn pdfHistoryScript)
+  , KeySection "Dmenu & YAD Scripts"
+               [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn dmenu_run)
+               , ("M-d c"        , addName "\tChange color theme"            $ spawn changeColorScript )
+               , ("M-d x"        , addName "\tExit prompt "                  $ spawn powerOptsScript)
+               , ("M-d p"        , addName "\tPdf history"                   $ spawn pdfHistoryScript)
+               , ("M-d d"        , addName "\tDictionary:word meaning"       $ spawn dictionaryScript)
                ]
   , KeySection "Applications"
                [ ("M-S-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
-               , ("M-d"          , addName "\tLaunch Doom Emacs"                        $ spawn doomEmacsclientScript)
-               , ("M-v"          , addName "\tLaunch vanilla Emacs"                     $ spawn vanillaEmacsclientScript)
+               , ("M-e d"        , addName "\tLaunch Doom Emacs"                        $ spawn doomEmacsclientScript)
+               , ("M-e v"        , addName "\tLaunch vanilla Emacs"                     $ spawn vanillaEmacsclientScript)
                ]
   , KeySection "Layout Controls"
                [ ("M-S-<Tab>"    , addName "\tReset the window layout"             $ setLayout $ layoutHook conf)
@@ -281,7 +282,7 @@ myKeysSections conf =
                , ("M-S-m"        , addName "\tRotate layout by 90 degrees"         $ sendMessage $ Toggle MIRROR)
                , ("M-t s"        , addName "\tToggle gaps"                         $ toggleSpaces)
                , ("M-t b"        , addName "\tToggle borders"                      $ sendMessage $ Toggle NOBORDERS)
-               , ("M-S-s"        , addName "\tSink/Tile a floating window"         $ withFocused $ windows . W.sink)
+               , ("M-s"          , addName "\tSink a floating window"         $ withFocused $ windows . W.sink)
                , ("M-,"          , addName "\tIncrease windows in the master pane" $ sendMessage (IncMasterN 1))
                , ("M-."          , addName "\tDecrease windows in the master pane" $ sendMessage (IncMasterN (-1)))
                , ("M-S-n"        , addName "\tOpen a scratchpad"                   $ namedScratchpadAction scratchpads "notes")
@@ -344,9 +345,9 @@ myKeysSections conf =
 
                ]
   , KeySection "Gap Controls"
-               [ ("M-s i"        , addName "\tIncrease gap size by 5 pixels"      $ incScreenWindowSpacing 5)
-               , ("M-s d"        , addName "\tdecrease gap size by 5 pixels"      $ decScreenWindowSpacing 5)
-               , ("M-s r"        , addName "\tReset gap size to `defaultGapSize`" $ setScreenWindowSpacing 10)
+               [ ("M-g i"        , addName "\tIncrease gap size by 5 pixels"      $ incScreenWindowSpacing 5)
+               , ("M-g d"        , addName "\tdecrease gap size by 5 pixels"      $ decScreenWindowSpacing 5)
+               , ("M-g r"        , addName "\tReset gap size to `defaultGapSize`" $ setScreenWindowSpacing 10)
                ]
   ]
      where
