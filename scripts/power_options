@@ -1,9 +1,0 @@
-#!/bin/bash
-
-choice=$(printf 'cancel\nlogout\nhibernate\nsuspend\npoweroff\nreboot'|dmenu -i -p "Choose Option")
-[ $choice = "cancel"    ] ;
-[ $choice = "logout"    ] && xdotool key super+shift+q
-[ $choice = "poweroff"  ] && poweroff
-[ $choice = "reboot"    ] && reboot
-[ $choice = "hibernate" ] && systemctl hibernate
-[ $choice = "suspend"   ] && systemctl suspend

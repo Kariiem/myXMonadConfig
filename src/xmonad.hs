@@ -84,20 +84,42 @@ myBorderWidth = 2
 defaultGapSize :: Integer
 defaultGapSize = 10
 
-scriptsDir = "$XDG_CONFIG_HOME/xmonad/scripts/"
-doomEmacsclientScript = scriptsDir ++ "run_emacs doom doom-emacs -c" -- `-c` opens a new frame
-vanillaEmacsclientScript = scriptsDir ++ "run_emacs vanilla vanilla-emacs -c"
-changeColorScript  = scriptsDir ++ "change_color_theme"
-pdfHistoryScript = scriptsDir ++ "pdf_history"
-powerOptsScript = scriptsDir ++ "power_options"
-dictionaryScript= scriptsDir ++ "def"
-dmenu_run = "~/Suckless/bin/dmenu_run_history"
+data ScriptsSection = ScriptsSection String String [String]
+
+-- each string names in the ScriptSection list is name of the script to be called for action
+scripts = [ ScriptsSection "dmenu" "$XDG_CONFIG_HOME/scripts/dmenu/"
+                           [ "run"
+                           , "pass"
+                           , "theme"
+                           , "pdfhist"
+                           , "poweropts"
+                           , "screenshot"
+                           ]
+          , ScriptsSection "yad" "$XDG_CONFIG_HOME/scripts/yad/"
+                           [ "update"
+                           , "dictionary"
+                           ]
+          , ScriptsSection "misc" "$XDG_CONFIG_HOME/scripts/misc/"
+                           [ "doom"
+                           , "vanilla"
+                           ]
+          ]
+
+scriptsMap = M.fromList $ [ (section ++ script, path ++ script)
+                          | (ScriptsSection section path xs) <- scripts
+                          , script <- xs  ]
+
+scriptPath section name = scriptsMap M.! (section ++ name)
+volumeControls = M.fromList [ ("inc", "pactl set-sink-volume @DEFAULT_SINK@ +1000")
+                            , ("dec", "pactl set-sink-volume @DEFAULT_SINK@ -1000")
+                            , ("tog", "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+                            ]
 
 sysMonitor :: String
 sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["home","fecu","www","docs","dev","xmonad","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["fecu","home","GSoC","www","dev1","dev2","xmonad","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -265,16 +287,19 @@ myKeysSections conf =
                , ("M-S-b"        , addName "\tShow/Hide status bar"          $ sendMessage ToggleStruts)
                ]
   , KeySection "Dmenu & YAD Scripts"
-               [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn dmenu_run)
-               , ("M-d c"        , addName "\tChange color theme"            $ spawn changeColorScript )
-               , ("M-d x"        , addName "\tExit prompt "                  $ spawn powerOptsScript)
-               , ("M-d p"        , addName "\tPdf history"                   $ spawn pdfHistoryScript)
-               , ("M-d d"        , addName "\tDictionary:word meaning"       $ spawn dictionaryScript)
+               [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn $ scriptPath "dmenu" "run" )
+               , ("M-d c"        , addName "\tChange color theme"            $ spawn $ scriptPath "dmenu" "theme" )
+               , ("M-d x"        , addName "\tExit prompt "                  $ spawn $ scriptPath "dmenu" "poweropts")
+               , ("M-d p"        , addName "\tPdf history"                   $ spawn $ scriptPath "dmenu" "pdfhist")
+               , ("M-d d"        , addName "\tDictionary:word meaning"       $ spawn $ scriptPath "yad"   "dictionary")
+               , ("M-d u"        , addName "\tSystem Update"                 $ spawn $ scriptPath "yad"   "update")
+               , ("M-d s"        , addName "\tScreenshot"                    $ spawn $ scriptPath "dmenu" "screenshot")
+               , ("M-p"          , addName "\tPassmenu"                      $ spawn $ scriptPath "dmenu" "pass")
                ]
   , KeySection "Applications"
                [ ("M-S-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
-               , ("M-e d"        , addName "\tLaunch Doom Emacs"                        $ spawn doomEmacsclientScript)
-               , ("M-e v"        , addName "\tLaunch vanilla Emacs"                     $ spawn vanillaEmacsclientScript)
+               , ("M-e d"        , addName "\tLaunch Doom Emacs"                        $ spawn $ scriptPath "misc" "doom")
+               , ("M-e v"        , addName "\tLaunch vanilla Emacs"                     $ spawn $ scriptPath "misc" "vanilla")
                ]
   , KeySection "Layout Controls"
                [ ("M-S-<Tab>"    , addName "\tReset the window layout"             $ setLayout $ layoutHook conf)
@@ -282,7 +307,7 @@ myKeysSections conf =
                , ("M-S-m"        , addName "\tRotate layout by 90 degrees"         $ sendMessage $ Toggle MIRROR)
                , ("M-t s"        , addName "\tToggle gaps"                         $ toggleSpaces)
                , ("M-t b"        , addName "\tToggle borders"                      $ sendMessage $ Toggle NOBORDERS)
-               , ("M-s"          , addName "\tSink a floating window"         $ withFocused $ windows . W.sink)
+               , ("M-s"          , addName "\tSink a floating window"              $ withFocused $ windows . W.sink)
                , ("M-,"          , addName "\tIncrease windows in the master pane" $ sendMessage (IncMasterN 1))
                , ("M-."          , addName "\tDecrease windows in the master pane" $ sendMessage (IncMasterN (-1)))
                , ("M-S-n"        , addName "\tOpen a scratchpad"                   $ namedScratchpadAction scratchpads "notes")
@@ -348,6 +373,14 @@ myKeysSections conf =
                [ ("M-g i"        , addName "\tIncrease gap size by 5 pixels"      $ incScreenWindowSpacing 5)
                , ("M-g d"        , addName "\tdecrease gap size by 5 pixels"      $ decScreenWindowSpacing 5)
                , ("M-g r"        , addName "\tReset gap size to `defaultGapSize`" $ setScreenWindowSpacing 10)
+               ]
+  , KeySection "Fn Keys and Others"
+               [ ("<XF86AudioRaiseVolume>"     , addName "\tInc Volume"          $ spawn $ volumeControls M.! "inc")
+               , ("<XF86AudioLowerVolume>"     , addName "\tDec Volume"          $ spawn $ volumeControls M.! "dec")
+               , ("<XF86AudioMute>"            , addName "\tToggle Volume"       $ spawn $ volumeControls M.! "tog")
+               , ("<XF86MonBrightnessUp>"      , addName "\tInc Brightness"      $ spawn "light -A 10")
+               , ("<XF86MonBrightnessDown>"    , addName "\tInc Brightness"      $ spawn "light -U 10")
+               , ("M-<Print>"                  , addName "\tTake a Screnshot"    $ spawn "maim -u ~/Pictures/Screenshots/\"$(date)\".png")
                ]
   ]
      where

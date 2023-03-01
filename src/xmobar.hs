@@ -144,15 +144,15 @@ instance MyMonitor MyMemory where
                   $ dtBox "mem:%memory%" "Bottom" "#ff6600"
 
 checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
-checkUpdatesTemplate = action "$XDG_CONFIG_HOME/xmonad/scripts/yadUpdates"
+checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/yad_update"
                 $ fontSize 6
                 $ colorize "#ff0000"
                 $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
 
-trayer = Com "/bin/bash" [ "-c", "$XDG_CONFIG_HOME/xmonad/scripts/icon_padding" ] "trayerpad" 10
+trayer = Com "/bin/bash" [ "-c", "$XDG_CONFIG_HOME/xmonad/icon_padding" ] "trayerpad" 10
 trayerTemplate = "%trayerpad%"
 
-datetime = Date "%b %d %Y-<fc=#00d5c8>%I:%M</fc>" "date" 10
+datetime = Date "<fc=#00d5c8>%I:%M</fc> %b %d %Y" "date" 10
 dateTemplate = fontSize 6
              $ colorize "#e0a5ff"
              $ dtBox "<fn=5>\x1f551</fn> %date%" "Bottom" "#e0a5ff"
