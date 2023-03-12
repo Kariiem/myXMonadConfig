@@ -149,8 +149,8 @@ checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
                 $ colorize "#ff0000"
                 $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
 
-trayer = Com "/bin/bash" [ "-c", "$XDG_CONFIG_HOME/xmonad/icon_padding" ] "trayerpad" 10
-trayerTemplate = "%trayerpad%"
+trayer = XPropertyLog "_XMONAD_STRAYPAD"
+trayerTemplate = "%_XMONAD_STRAYPAD%"
 
 datetime = Date "<fc=#00d5c8>%I:%M</fc> %b %d %Y" "date" 10
 dateTemplate = fontSize 6
@@ -169,6 +169,8 @@ config :: Config
 config =
   defaultConfig
     {
+      lowerOnStart = True,
+      overrideRedirect = True,
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
         ++ checkUpdatesTemplate
@@ -179,7 +181,7 @@ config =
         ++ dateTemplate
         ++ kbdTemplate
         ++ monitorTemplate MyBattery
-        ++ trayerTemplate,
+        ++ trayerTemplate ,
 
       font = "Hack Bold Italic 12",
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
@@ -200,7 +202,7 @@ config =
         , Run cpu
         , Run temperature
         , Run checkUpdates
-       ],
+        ],
       alignSep = "}{",
       sepChar  = "%"
     }

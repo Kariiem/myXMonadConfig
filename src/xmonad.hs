@@ -188,7 +188,11 @@ myEventHook =
   composeAll
     [ Hacks.windowedFullscreenFixEventHook
     , swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
+    , stalonetrayAboveXmobarEventHook
+    , stalonetrayPaddingXmobarEventHook
     ]
+stalonetrayAboveXmobarEventHook = Hacks.trayAbovePanelEventHook (className =? "stalonetray") (appName =? "xmobar")
+stalonetrayPaddingXmobarEventHook = Hacks.trayPaddingXmobarEventHook (className =? "stalonetray") "_XMONAD_STRAYPAD"
 
 myManageHook :: Query (Endo WindowSet)
 myManageHook =

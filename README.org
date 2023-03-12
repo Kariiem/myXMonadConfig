@@ -264,7 +264,11 @@ myEventHook =
   composeAll
     [ Hacks.windowedFullscreenFixEventHook
     , swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
+    , stalonetrayAboveXmobarEventHook
+    , stalonetrayPaddingXmobarEventHook
     ]
+stalonetrayAboveXmobarEventHook = Hacks.trayAbovePanelEventHook (className =? "stalonetray") (appName =? "xmobar")
+stalonetrayPaddingXmobarEventHook = Hacks.trayPaddingXmobarEventHook (className =? "stalonetray") "_XMONAD_STRAYPAD"
 #+end_src
 
 
@@ -758,8 +762,8 @@ checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
 #+end_src
 *** Trayer
 #+begin_src haskell :tangle src/xmobar.hs
-trayer = Com "/bin/bash" [ "-c", "$XDG_CONFIG_HOME/xmonad/icon_padding" ] "trayerpad" 10
-trayerTemplate = "%trayerpad%"
+trayer = XPropertyLog "_XMONAD_STRAYPAD"
+trayerTemplate = "%_XMONAD_STRAYPAD%"
 #+end_src
 *** Date
 #+begin_src haskell :tangle src/xmobar.hs
@@ -785,6 +789,8 @@ config :: Config
 config =
   defaultConfig
     {
+      lowerOnStart = True,
+      overrideRedirect = True,
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
         ++ checkUpdatesTemplate
@@ -795,7 +801,7 @@ config =
         ++ dateTemplate
         ++ kbdTemplate
         ++ monitorTemplate MyBattery
-        ++ trayerTemplate,
+        ++ trayerTemplate ,
 
       font = "Hack Bold Italic 12",
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
@@ -816,7 +822,7 @@ config =
         , Run cpu
         , Run temperature
         , Run checkUpdates
-       ],
+        ],
       alignSep = "}{",
       sepChar  = "%"
     }
