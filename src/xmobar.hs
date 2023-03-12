@@ -19,7 +19,7 @@ colorize color str = "<fc=" ++ color ++ ">" ++ str ++"</fc>"
 fontSize :: Int->String->String
 fontSize i str = "<fn="++show i++ ">"++ str ++ "</fn>"
 
-action command str = "<action=`"++command ++ "`>" ++ str ++"</action>"
+action command str = "<action=`"++ command ++ "`>" ++ str ++"</action>"
 
 fontList = [ (1,"Hack Bold 14")
            , (2,"Hack Bold Italic 14")
@@ -144,7 +144,7 @@ instance MyMonitor MyMemory where
                   $ dtBox "mem:%memory%" "Bottom" "#ff6600"
 
 checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
-checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/yad_update"
+checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
                 $ fontSize 6
                 $ colorize "#ff0000"
                 $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
@@ -182,7 +182,7 @@ config =
         ++ trayerTemplate,
 
       font = "Hack Bold Italic 12",
-      position = TopHM 30 10 10 5 5, -- Height, left/right margins, top/down margins
+      position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
       additionalFonts = map snd fontList,
       allDesktops = True,
       alpha = 255,

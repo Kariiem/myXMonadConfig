@@ -84,32 +84,15 @@ myBorderWidth = 2
 defaultGapSize :: Integer
 defaultGapSize = 10
 
-data ScriptsSection = ScriptsSection String String [String]
 
 -- each string names in the ScriptSection list is name of the script to be called for action
-scripts = [ ScriptsSection "dmenu" "$XDG_CONFIG_HOME/scripts/dmenu/"
-                           [ "run"
-                           , "pass"
-                           , "theme"
-                           , "pdfhist"
-                           , "poweropts"
-                           , "screenshot"
-                           ]
-          , ScriptsSection "yad" "$XDG_CONFIG_HOME/scripts/yad/"
-                           [ "update"
-                           , "dictionary"
-                           ]
-          , ScriptsSection "misc" "$XDG_CONFIG_HOME/scripts/misc/"
-                           [ "doom"
-                           , "vanilla"
-                           ]
-          ]
+scripts = M.fromList [ ("dmenu","$XDG_CONFIG_HOME/scripts/dmenu/")
+                     ,  ("yad", "$XDG_CONFIG_HOME/scripts/yad/")
+                     ,  ("misc", "$XDG_CONFIG_HOME/scripts/misc/")
+                     ]
 
-scriptsMap = M.fromList $ [ (section ++ script, path ++ script)
-                          | (ScriptsSection section path xs) <- scripts
-                          , script <- xs  ]
+scriptPath section name = (scripts M.! section) ++ name
 
-scriptPath section name = scriptsMap M.! (section ++ name)
 volumeControls = M.fromList [ ("inc", "pactl set-sink-volume @DEFAULT_SINK@ +1000")
                             , ("dec", "pactl set-sink-volume @DEFAULT_SINK@ -1000")
                             , ("tog", "pactl set-sink-mute @DEFAULT_SINK@ toggle")
@@ -119,7 +102,7 @@ sysMonitor :: String
 sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["fecu","home","GSoC","www","dev1","dev2","xmonad","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["fecu","home","gsoc","www","dev","vm","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -147,7 +130,7 @@ myPP =
       ppSep = " ",
       ppWsSep = " ",
       ppExtras = [windowCount],
-      ppTitle = xmobarColor (colorFore theme) "" . shorten 45,
+      ppTitle = xmobarColor (colorFore theme) "" . shorten 40,
       ppHidden = xmobarColor (colorCyan theme) "",
       ppHiddenNoWindows = xmobarColor (colorGrey theme) "",
       ppOrder = \(ws : l : t : ex) -> ws : ex ++ l : [t]
@@ -181,29 +164,30 @@ myStartupHook = do
                <*> (concatMap (\(KeySection _ keys) ->keys) . myKeysSections)
                $ myXConfig {layoutHook = Layout $ layoutHook myXConfig}
   setWMName "LG3D"
-  spawnOnce "sxhkd"
-  spawnOnce "emacs --with-profile doom-emacs --daemon &"
-  spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
+  -- spawnOnce "sxhkd"
+  -- spawnOnce "emacs --with-profile doom-emacs --daemon &"
+  -- spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
   spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
-  spawn "killall trayer"
   spawnOnce "nm-applet"
+  spawnOnce "blueman-applet"
+  spawnOnce "volumeicon"
   spawnOnce "picom"
+  spawn trayer2
 
-  spawn $
-     "sleep 2 && trayer --edge top --align right --distance 10 --distancefrom right --distance 5 --distancefrom top \
+trayer1 = "killall trayer ; sleep 2 && trayer --edge top --align right --distance 10 --distancefrom right --distance 5 --distancefrom top \
       \--widthtype request --padding 6 --SetDockType true --SetPartialStrut false --expand true --transparent true --alpha 0 \
       \--tint "
-        ++ trayerColor
-        ++ " --height 30"
-
-
-trayerColor = "0x" ++ tail (colorBack theme)
+        ++ trayer1Color
+        ++ " --height 25"
+trayer2 = "killall stalonetray ; sleep 2 && stalonetray --grow-gravity E --icon-gravity E --dockapp-mode --window-type dock -geometry 1x1-10+5 -bg " ++ trayer2Color
+trayer1Color = "0x" ++ tail (colorBack theme)
+trayer2Color = show $ colorBack theme
 
 myEventHook :: Event -> X All
 myEventHook =
   composeAll
-    [ Hacks.windowedFullscreenFixEventHook,
-      swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
+    [ Hacks.windowedFullscreenFixEventHook
+    , swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
     ]
 
 myManageHook :: Query (Endo WindowSet)
@@ -287,7 +271,7 @@ myKeysSections conf =
                , ("M-S-b"        , addName "\tShow/Hide status bar"          $ sendMessage ToggleStruts)
                ]
   , KeySection "Dmenu & YAD Scripts"
-               [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn $ scriptPath "dmenu" "run" )
+               [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn $ scriptPath "dmenu" "run-recent" )
                , ("M-d c"        , addName "\tChange color theme"            $ spawn $ scriptPath "dmenu" "theme" )
                , ("M-d x"        , addName "\tExit prompt "                  $ spawn $ scriptPath "dmenu" "poweropts")
                , ("M-d p"        , addName "\tPdf history"                   $ spawn $ scriptPath "dmenu" "pdfhist")
@@ -297,7 +281,7 @@ myKeysSections conf =
                , ("M-p"          , addName "\tPassmenu"                      $ spawn $ scriptPath "dmenu" "pass")
                ]
   , KeySection "Applications"
-               [ ("M-S-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
+               [ ("M-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
                , ("M-e d"        , addName "\tLaunch Doom Emacs"                        $ spawn $ scriptPath "misc" "doom")
                , ("M-e v"        , addName "\tLaunch vanilla Emacs"                     $ spawn $ scriptPath "misc" "vanilla")
                ]
@@ -317,7 +301,7 @@ myKeysSections conf =
                , ("M-S-a"        , addName "\tKill all copies of the focused window"     $ killAllOtherCopies)
                , ("M-k"          , addName "\tFocus the next window"                     $ windows W.focusDown)
                , ("M-j"          , addName "\tFocus the previous window"                 $ windows W.focusUp)
-               , ("M-<Return>"   , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
+               , ("M-S-<Return>"   , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
                , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ windows W.swapDown)
                , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ windows W.swapUp)
                , ("M-h"          , addName "\tShrink window"       $ sendMessage Shrink)
