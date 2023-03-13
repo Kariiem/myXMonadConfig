@@ -170,7 +170,7 @@ myStartupHook = do
   spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
   spawnOnce "nm-applet"
   spawnOnce "blueman-applet"
-  spawnOnce "volumeicon"
+  spawnOnce "pa-applet"
   spawnOnce "picom"
   spawn trayer2
 
@@ -179,7 +179,7 @@ trayer1 = "killall trayer ; sleep 2 && trayer --edge top --align right --distanc
       \--tint "
         ++ trayer1Color
         ++ " --height 25"
-trayer2 = "killall stalonetray ; sleep 2 && stalonetray --grow-gravity E --icon-gravity E --dockapp-mode --window-type dock -geometry 1x1-10+5 -bg " ++ trayer2Color
+trayer2 = "killall stalonetray ; sleep 2 && stalonetray --grow-gravity E --icon-gravity E --window-type dock -geometry 1x1-10+5 -bg " ++ trayer2Color
 trayer1Color = "0x" ++ tail (colorBack theme)
 trayer2Color = show $ colorBack theme
 
