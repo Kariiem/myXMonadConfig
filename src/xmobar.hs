@@ -1,5 +1,11 @@
+{-# LANGUAGE AllowAmbiguousTypes, TypeApplications, ScopedTypeVariables #-}
+
   -- Builtin
 import Text.Printf as P
+import qualified Data.Map.Strict as M
+import qualified Data.List as L
+
+import Data.Maybe
 
   -- Basic
 import Xmobar
@@ -21,6 +27,25 @@ fontSize i str = "<fn="++show i++ ">"++ str ++ "</fn>"
 
 action command str = "<action=`"++ command ++ "`>" ++ str ++"</action>"
 
+type Name = String
+type Size = Int
+data FontStyle = Normal | Bold | Italic | BoldItalic deriving (Eq,Ord)
+instance Show FontStyle where
+  show Normal = ""
+  show Bold = "Bold"
+  show Italic = "Italic"
+  show BoldItalic = "Bold Italic"
+data Font = Font Name FontStyle Size deriving (Eq,Ord,Show)
+
+fontToString (Font name style i) = name ++ " " ++ show style ++ " " ++ show i
+
+fontMap :: M.Map Font Int
+fontMap = M.fromList $ zip
+                [ Font name style size
+                | name <-["Hack"]
+                , size <-[8..14]
+                , style <- [Normal, Bold, Italic, BoldItalic] ]
+                [1..]
 fontList = [ (1,"Hack Bold 14")
            , (2,"Hack Bold Italic 14")
            , (3,"Hack Bold 12")
@@ -33,31 +58,44 @@ fontList = [ (1,"Hack Bold 14")
            ]
 
 class MyMonitor a where
-  def :: a -> [(String, String)]
-  def = const []
+  templateString::String
+  monfont::Font
+  monfont = Font "Hack" BoldItalic 8
+  color::String
+  color = "#0088aa"
+  monaction::String
+  monaction = ":"
 
-  monitorSpecific :: a -> [(String, String)]
-  monitorSpecific  = const []
+  def :: [(String, String)]
+  def = []
 
-  monitorTemplate :: a -> String
-  monitorTemplate = const ""
+  monitorSpecific :: [(String, String)]
+  monitorSpecific  = []
 
-  toArgs :: a -> [String]
-  toArgs a = concatMap (\(x, y) -> [x, y]) (def a ++ monitorSpecific a)
+  toArgs ::  [String]
+  toArgs = concatMap (\(x, y) -> [x, y]) ((def @a) ++ (monitorSpecific @a) )
 
-data MyBattery = MyBattery
-battery = BatteryP ["BAT1"] (toArgs MyBattery) 360
+  monitorTemplate :: String
+  monitorTemplate = P.printf "<action=`%s`><fn=%d><fc=%s>%s</fc></fn></action>"
+    (monaction @a)  templateFont (color @a)  (dtBox (templateString @a) "Bottom" (color @a) )
+    where
+      templateFont :: Int
+      templateFont = fromMaybe 1 (M.lookup (monfont @a) fontMap)
+
+data MyBattery
+battery = BatteryP ["BAT1"] (toArgs @MyBattery) 360
 
 instance MyMonitor MyBattery where
+  templateString =  "%battery%"
+  color = "#ee33bb"
+
   def =
-    const
       [ ("-t", "<acstatus><left>%"),
         ("-L", "20"),
         ("-H", "80"),
         ("-p", "3")
       ]
   monitorSpecific =
-    const
       [ ("--", ""),
         ("-i", "<fc=#0088aa>Full</fc>"), -- idle AC, fully charged
         ("-O", "\x1F50C"), -- \xf583"   -- On AC, charging
@@ -66,56 +104,47 @@ instance MyMonitor MyBattery where
         ("-A", "30"),
         ("-a", "notify-send -u critical 'Battery is running out!'")
       ]
-  monitorTemplate = const
-                  $ fontSize 6
-                  $ colorize "#ee33bb"
-                  $ dtBox "%battery%"  "Bottom" "#ee33bb"
 
-data MyBrightness = MyBrightness
-brightness = Brightness (toArgs MyBrightness) 1
+data MyBrightness
+brightness = Brightness (toArgs @MyBrightness) 1
 
 instance MyMonitor MyBrightness where
+  templateString = "%bright%"
+  color = "#dfaa11"
+  monfont = Font "Hack" BoldItalic 10
   def =
-    const
       [ ("-t", "<bar>"),
         ("-W", "10"),
         ("-b", " "), -- \x1fb8f
-        ("-f", "\x1fb39") 
+        ("-f", "\x1fb39")
       ]
   monitorSpecific =
-    const
       [ ("--", ""),
         ("-D", "intel_backlight"),
         ("-C", "actual_brightness"),
         ("-M", "max_brightness")
       ]
-  monitorTemplate = const
-                  $ fontSize 6
-                  $ colorize "#dfaa11" -- "#fffa55"
-                  $ dtBox "%bright%" "Bottom" "#dfaa11" -- <fn=1>\x1f317</fn>
 
-data MyCpu = MyCpu
-cpu = MultiCpu (toArgs MyCpu) 50
+data MyCpu
+cpu = MultiCpu (toArgs @MyCpu) 50
 instance MyMonitor MyCpu where
+  templateString = "cpu:%multicpu%"
+  color = "#ff8855"
+  monaction = "st -e btop"
   def =
-    const
       [ ("-t", "<total>%"),
         ("-L", "5"),
         ("-H", "50"),
         ("-l", "#ff8855"),
         ("-h", "red")
       ]
-  monitorTemplate = const
-                  $ action "st -e btop"
-                  $ fontSize 6
-                  $ colorize "#ff8855"
-                  $ dtBox "<fn=1>\xf26c</fn>  cpu:%multicpu%" "Bottom" "#ff8855"
 
-data MyTemp = MyTemp
-temperature = MultiCoreTemp (toArgs MyTemp) 50
+data MyTemp
+temperature = MultiCoreTemp (toArgs @MyTemp) 50
 instance MyMonitor MyTemp where
+  templateString = "%multicoretemp%"
+  color = "#ff647f"
   def =
-    const
       [ ("-t", "temp:<avg>\x2103"),
         ("-L", "60"),
         ("-H", "80"),
@@ -123,25 +152,19 @@ instance MyMonitor MyTemp where
         ("-h", "red")
       ]
   monitorSpecific =
-    const
       [ ("--" , ""),
         ("--mintemp","20"),
         ("--maxtemp","100")
       ]
-  monitorTemplate = const
-                  $ fontSize 6
-                  $ colorize "#ff647f"
-                  $ dtBox "%multicoretemp%" "Bottom" "#ff647f"
 
-data MyMemory = MyMemory
-memory = Memory (toArgs MyMemory) 20
+data MyMemory
+memory = Memory (toArgs @MyMemory) 20
 
 instance MyMonitor MyMemory where
-  def = const [("-t", "<used>mb(<usedratio>%)")]
-  monitorTemplate = const
-                  $ fontSize 6
-                  $ colorize "#ff6600"
-                  $ dtBox "mem:%memory%" "Bottom" "#ff6600"
+  templateString = "mem:%memory%"
+  color = "#ff6600"
+  monaction = "st -e btop"
+  def = [("-t", "<used>mb(<usedratio>%)")]
 
 checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
 checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
@@ -174,18 +197,18 @@ config =
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
         ++ checkUpdatesTemplate
-        ++ monitorTemplate MyBrightness
-        ++ monitorTemplate MyTemp
-        ++ monitorTemplate MyMemory
-        ++ monitorTemplate MyCpu
+        ++ monitorTemplate @MyBrightness
+        ++ monitorTemplate @MyTemp
+        ++ monitorTemplate @MyMemory
+        ++ monitorTemplate @MyCpu
         ++ dateTemplate
         ++ kbdTemplate
-        ++ monitorTemplate MyBattery
+        ++ monitorTemplate @MyBattery
         ++ trayerTemplate ,
 
-      font = "Hack Bold Italic 12",
+      font = "Hack Bold Italic 8",
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
-      additionalFonts = map snd fontList,
+      additionalFonts = map (fontToString.fst) $ L.sortOn snd $ M.toList fontMap ,--map snd fontList,
       allDesktops = True,
       alpha = 255,
       bgColor = colorBack theme,

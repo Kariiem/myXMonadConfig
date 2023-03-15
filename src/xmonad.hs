@@ -102,7 +102,7 @@ sysMonitor :: String
 sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["fecu","home","gsoc","www","dev","vm","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["fecu","home","gsoc","www","dev","freebsd","guix","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
