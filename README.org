@@ -246,12 +246,32 @@ myStartupHook = do
   spawnOnce "picom"
   spawn trayer2
 
-trayer1 = "killall trayer ; sleep 2 && trayer --edge top --align right --distance 10 --distancefrom right --distance 5 --distancefrom top \
-      \--widthtype request --padding 6 --SetDockType true --SetPartialStrut false --expand true --transparent true --alpha 0 \
-      \--tint "
+trayer1 = "killall trayer ; sleep 2 && trayer --edge top \
+          \--align right \
+          \--distance 10 \
+          \--distancefrom right \
+          \--distance 5 \
+          \--distancefrom top \
+          \--widthtype request \
+          \--padding 6 \
+          \--SetDockType true \
+          \--SetPartialStrut false \
+          \--expand true \
+          \--transparent true \
+          \--alpha 0 \
+          \--tint "
         ++ trayer1Color
         ++ " --height 25"
-trayer2 = "killall stalonetray ; sleep 2 && stalonetray --grow-gravity E --icon-gravity E --window-type dock -geometry 1x1-10+5 -bg " ++ trayer2Color
+trayer2 = "killall stalonetray ; sleep 2 && stalonetray \
+          \--sticky true \
+          \--dockapp-mode none \
+          \--icon-size 24 \
+          \--grow-gravity E \
+          \--icon-gravity SW \
+          \--kludges force_icons_size \
+          \--window-type dock \
+          \--geometry 1x1-10+5 \
+          \--background " ++ trayer2Color
 trayer1Color = "0x" ++ tail (colorBack theme)
 trayer2Color = show $ colorBack theme
 #+end_src
@@ -300,6 +320,9 @@ myManageHook =
       className =? "notification" --> doFloat,
       className =? "Xmessage" --> doFloat,
       className =? "Yad" -->doCenterFloat,
+      -- The following line causes the trayer (stalonetray) to hide on <toggleStruts>
+      -- and on full screen events
+      className =? "stalonetray" --> doLower,
       placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
     ]
 
