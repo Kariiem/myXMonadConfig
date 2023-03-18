@@ -102,7 +102,7 @@ sysMonitor :: String
 sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["fecu","home","gsoc","www","dev","freebsd","guix","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["fecu","home","gsoc","www","dev","freebsd","guix","mariadb","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -195,7 +195,7 @@ trayer2 = "killall stalonetray ; sleep 2 && stalonetray \
           \--dockapp-mode none \
           \--icon-size 24 \
           \--grow-gravity E \
-          \--icon-gravity SW \
+          \--icon-gravity SE \
           \--kludges force_icons_size \
           \--window-type dock \
           \--geometry 1x1-10+5 \
@@ -217,19 +217,21 @@ stalonetrayPaddingXmobarEventHook = Hacks.trayPaddingXmobarEventHook (className 
 myManageHook :: Query (Endo WindowSet)
 myManageHook =
   composeAll
-    [ manageSpawn,
-      insertPosition Below Newer,
-      namedScratchpadManageHook scratchpads,
-      className =? "jetbrains-idea-ce" --> doFloat,
-      className =? "dialog" --> doFloat,
-      className =? "download" --> doFloat,
-      className =? "notification" --> doFloat,
-      className =? "Xmessage" --> doFloat,
-      className =? "Yad" -->doCenterFloat,
-      -- The following line causes the trayer (stalonetray) to hide on <toggleStruts>
-      -- and on full screen events
-      className =? "stalonetray" --> doLower,
-      placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
+    [ manageSpawn
+    , insertPosition Below Newer
+    , namedScratchpadManageHook scratchpads
+    , className =? "jetbrains-idea-ce"  --> doFloat
+    , className =? "dialog"             --> doFloat
+    , className =? "download"           --> doFloat
+    , className =? "notification"       --> doFloat
+    , className =? "Xmessage"           --> doFloat
+    , className =? "Yad"                --> doCenterFloat
+    -- The following line causes the trayer (stalonetray) to hide on <toggleStruts>
+    -- and on full screen events
+    , className =? "stalonetray"
+      <||> className =? "trayer"
+      <||> className =? "panel"         --> doLower
+    , placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
     ]
 
 mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
@@ -364,6 +366,8 @@ myKeysSections conf =
                , ("M-5"          , addName ("\tGoto workspace 5")                 $ windows $ W.greedyView $ ws !! 4)
                , ("M-6"          , addName ("\tGoto workspace 6")                 $ windows $ W.greedyView $ ws !! 5)
                , ("M-7"          , addName ("\tGoto workspace 7")                 $ windows $ W.greedyView $ ws !! 6)
+               , ("M-8"          , addName ("\tGoto workspace 8")                 $ windows $ W.greedyView $ ws !! 7)
+               , ("M-9"          , addName ("\tGoto workspace 9")                 $ windows $ W.greedyView $ ws !! 8)
                , ("M-S-1"        , addName ("\tShift window to workspace 1")      $ windows $ W.shift $ ws !! 0)
                , ("M-S-2"        , addName ("\tShift window to workspace 2")      $ windows $ W.shift $ ws !! 1)
                , ("M-S-3"        , addName ("\tShift window to workspace 3")      $ windows $ W.shift $ ws !! 2)
@@ -371,6 +375,8 @@ myKeysSections conf =
                , ("M-S-5"        , addName ("\tShift window to workspace 5")      $ windows $ W.shift $ ws !! 4)
                , ("M-S-6"        , addName ("\tShift window to workspace 6")      $ windows $ W.shift $ ws !! 5)
                , ("M-S-7"        , addName ("\tShift window to workspace 7")      $ windows $ W.shift $ ws !! 6)
+               , ("M-S-8"        , addName ("\tShift window to workspace 8")      $ windows $ W.shift $ ws !! 7)
+               , ("M-S-9"        , addName ("\tShift window to workspace 9")      $ windows $ W.shift $ ws !! 8)
                , ("M-C-1"        , addName ("\tCopy window to workspace 1")       $ windows $ copy $ ws !! 0)
                , ("M-C-2"        , addName ("\tCopy window to workspace 2")       $ windows $ copy $ ws !! 1)
                , ("M-C-3"        , addName ("\tCopy window to workspace 3")       $ windows $ copy $ ws !! 2)
@@ -378,7 +384,8 @@ myKeysSections conf =
                , ("M-C-5"        , addName ("\tCopy window to workspace 5")       $ windows $ copy $ ws !! 4)
                , ("M-C-6"        , addName ("\tCopy window to workspace 6")       $ windows $ copy $ ws !! 5)
                , ("M-C-7"        , addName ("\tCopy window to workspace 7")       $ windows $ copy $ ws !! 6)
-
+               , ("M-C-8"        , addName ("\tCopy window to workspace 8")       $ windows $ copy $ ws !! 7)
+               , ("M-C-9"        , addName ("\tCopy window to workspace 9")       $ windows $ copy $ ws !! 8)
                ]
   , KeySection "Gap Controls"
                [ ("M-g i"        , addName "\tIncrease gap size by 5 pixels"      $ incScreenWindowSpacing 5)
