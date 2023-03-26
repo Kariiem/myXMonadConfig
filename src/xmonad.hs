@@ -198,7 +198,7 @@ trayer2 = "killall stalonetray ; sleep 2 && stalonetray \
           \--icon-gravity SE \
           \--kludges force_icons_size \
           \--window-type dock \
-          \--geometry 1x1-10+5 \
+          \--geometry 1x1-15+5 \
           \--background " ++ trayer2Color
 trayer1Color = "0x" ++ tail (colorBack theme)
 trayer2Color = show $ colorBack theme
@@ -399,6 +399,7 @@ myKeysSections conf =
                , ("<XF86MonBrightnessUp>"      , addName "\tInc Brightness"      $ spawn "light -A 10")
                , ("<XF86MonBrightnessDown>"    , addName "\tInc Brightness"      $ spawn "light -U 10")
                , ("M-<Print>"                  , addName "\tTake a Screnshot"    $ spawn "maim -u ~/Pictures/Screenshots/\"$(date)\".png")
+               , ("<XF86AudioPlay>"            , addName "\tResume/Pause"        $ spawn "mocp --toggle-pause"    )
                ]
   ]
      where
