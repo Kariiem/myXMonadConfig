@@ -19,7 +19,6 @@
 - [[#xmobar][XMobar]]
   - [[#language-extensions-1][Language Extensions]]
   - [[#imports-1][Imports]]
-  - [[#utils][Utils]]
   - [[#fonts][Fonts]]
   - [[#monitors][Monitors]]
   - [[#main-1][Main]]
@@ -92,6 +91,8 @@ import XMonad.Util.Run
 
   -- MyLib
 import Color.Theme
+import Contrib.Hidden
+
 #+end_src
 
 
@@ -150,7 +151,6 @@ myWorkspaces = ["fecu","home","gsoc","www","dev","freebsd","guix","mariadb","sys
 
 #+end_src
 
-
 ** Scratchpads
 #+begin_src haskell
 scratchpads =
@@ -164,7 +164,6 @@ scratchpads =
   ]
 
 #+end_src
-
 
 ** Log Hook
 #+begin_src haskell
@@ -330,10 +329,6 @@ myManageHook =
 
 #+end_src
 
-#+RESULTS:
-: <interactive>:20:5: error: parse error on input ‘]’
-
-
 ** Layout Hook
 
 #+begin_src haskell
@@ -341,17 +336,21 @@ mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
 mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
 resizableTiled = renamed [Replace "tall"]
+               $ hiddenWindows
                $ mySpacing defaultGapSize defaultGapSize
                $ ResizableTall 1 (3 / 100) (1 / 2) []
 
 threeColMid = renamed [Replace "threeColMid"]
+            $ hiddenWindows
             $ mySpacing defaultGapSize defaultGapSize
             $ ResizableThreeColMid 1 (3 / 100) (1 / 2) []
 
 threeCol = renamed [Replace "threeCol"]
-            $ mySpacing defaultGapSize defaultGapSize
-            $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
+         $ hiddenWindows
+         $ mySpacing defaultGapSize defaultGapSize
+         $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
 tabLayout = renamed [Replace "tabs"]
+          $ hiddenWindows
           $ tabbed shrinkText tabLayoutTheme
 
 grid = renamed [Replace "grid"] $ mySpacing defaultGapSize defaultGapSize Grid
@@ -440,13 +439,16 @@ myKeysSections conf =
                , ("M-S-a"        , addName "\tKill all copies of the focused window"     $ killAllOtherCopies)
                , ("M-k"          , addName "\tFocus the next window"                     $ windows W.focusDown)
                , ("M-j"          , addName "\tFocus the previous window"                 $ windows W.focusUp)
-               , ("M-S-<Return>"   , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
+               , ("M-S-<Return>" , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
                , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ windows W.swapDown)
                , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ windows W.swapUp)
                , ("M-h"          , addName "\tShrink window"       $ sendMessage Shrink)
                , ("M-l"          , addName "\tExpand window"       $ sendMessage Expand)
                , ("M-S-l"        , addName "\tMirrorShrink window" $ sendMessage MirrorShrink)
                , ("M-S-h"        , addName "\tMirrorExpand window" $ sendMessage MirrorExpand)
+               , ("M-<Backspace>", addName "\tHide the current window" $  withFocused hideWindow)
+               , ("M-S-<Backspace>" , addName "\tRestore the oldest hidden window" $ popOldestHiddenWindow)
+               , ("M-C-<Backspace>" , addName "\tShow all the hidden windows"       $ sendMessage GetHidden)
                , ("M-S-<Right>"  , addName "\tShift window to next workspace"             $ shiftToNext)
                , ("M-S-<Left>"   , addName "\tShift window to prev workspace"             $ shiftToPrev)
                , ("M-C-<Right>"  , addName "\tShift window to next workspace, then goto"  $ shiftToNext >> nextWS)
@@ -533,9 +535,6 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
     ]
 #+end_src
 
-#+RESULTS:
-: <interactive>:129:5: error: parse error on input ‘]’
-
 *** Utility Functions
 #+begin_src haskell
 yad = "yad --undecorated --no-buttons --text-info --text-align=left --fontname=\"Hack 12\" --fore="
@@ -621,7 +620,6 @@ XMobar is a status bar written in haskell and can be used as a library for creat
 import Text.Printf as P
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
-
 import Data.Maybe
 
   -- Basic
@@ -630,23 +628,6 @@ import Xmobar
   -- MyLib
 import Color.Theme
 
-#+end_src
-** Utils
-#+begin_src haskell :tangle src/xmobar.hs
-
-box :: String -> String -> String -> Int -> (Int, Int, Int, Int) -> String
-box str ty color width (mt, mb, ml, mr) =
-  P.printf "<box type=%s width=%d mt=%d mb=%d ml=%d mr=%d color=%s > %s </box> " ty width mt mb ml mr color str
-
-dtBox str ty color = box str ty color 3 (0,0,0,0)
-
-colorize ::String -> String ->String
-colorize color str = "<fc=" ++ color ++ ">" ++ str ++"</fc>"
-
-fontSize :: Int->String->String
-fontSize i str = "<fn="++show i++ ">"++ str ++ "</fn>"
-
-action command str = "<action=`"++ command ++ "`>" ++ str ++"</action>"
 #+end_src
 
 ** Fonts
@@ -667,32 +648,21 @@ fontMap :: M.Map Font Int
 fontMap = M.fromList $ zip
                 [ Font name style size
                 | name <-["Hack"]
-                , size <-[8..14]
+                , size <-[6..14]
                 , style <- [Normal, Bold, Italic, BoldItalic] ]
                 [1..]
-fontList = [ (1,"Hack Bold 14")
-           , (2,"Hack Bold Italic 14")
-           , (3,"Hack Bold 12")
-           , (4,"Hack Bold Italic 12")
-           , (5,"Hack Bold 10")
-           , (6,"Hack Bold Italic 10")
-           , (7,"Hack Bold 8")
-           , (8,"Hack Bold Italic 8")
-           , (9,"Hack 8")
-           ]
 #+end_src
 
 ** Monitors
 #+begin_src haskell :tangle src/xmobar.hs
-
 class MyMonitor a where
   templateString::String
   monfont::Font
   monfont = Font "Hack" BoldItalic 8
   color::String
-  color = "#0088aa"
-  monaction::String
-  monaction = ":"
+  color = "#0088ff"
+  action::String
+  action = ":"
 
   def :: [(String, String)]
   def = []
@@ -704,23 +674,22 @@ class MyMonitor a where
   toArgs = concatMap (\(x, y) -> [x, y]) ((def @a) ++ (monitorSpecific @a) )
 
   monitorTemplate :: String
-  monitorTemplate = P.printf "<action=`%s`><fn=%d><fc=%s>%s</fc></fn></action>"
-    (monaction @a)  templateFont (color @a)  (dtBox (templateString @a) "Bottom" (color @a) )
+  monitorTemplate = P.printf "<fn=%d><fc=%s><action=`%s`>%s</action></fc></fn>"
+    templateFont (color @a) (action @a) barString
     where
+      barString = templateString @a ++ "<hspace=5/><fc=#c2a2e4>\x2223</fc><hspace=5/>"
       templateFont :: Int
       templateFont = fromMaybe 1 (M.lookup (monfont @a) fontMap)
-
 #+end_src
+
 *** Battery
 #+begin_src haskell :tangle src/xmobar.hs
-
 data MyBattery
 battery = BatteryP ["BAT1"] (toArgs @MyBattery) 360
 
 instance MyMonitor MyBattery where
   templateString =  "%battery%"
   color = "#ee33bb"
-
   def =
       [ ("-t", "<acstatus><left>%"),
         ("-L", "20"),
@@ -736,12 +705,10 @@ instance MyMonitor MyBattery where
         ("-A", "30"),
         ("-a", "notify-send -u critical 'Battery is running out!'")
       ]
-
 #+end_src
 
 *** Brightness
 #+begin_src haskell :tangle src/xmobar.hs
-
 data MyBrightness
 brightness = Brightness (toArgs @MyBrightness) 1
 
@@ -762,14 +729,16 @@ instance MyMonitor MyBrightness where
         ("-M", "max_brightness")
       ]
 #+end_src
+
 *** CPU
 #+begin_src haskell :tangle src/xmobar.hs
 data MyCpu
 cpu = MultiCpu (toArgs @MyCpu) 50
+
 instance MyMonitor MyCpu where
   templateString = "cpu:%multicpu%"
   color = "#ff8855"
-  monaction = "st -e btop"
+  action = "st -e btop"
   def =
       [ ("-t", "<total>%"),
         ("-L", "5"),
@@ -777,11 +746,13 @@ instance MyMonitor MyCpu where
         ("-l", "#ff8855"),
         ("-h", "red")
       ]
-  #+end_src
+#+end_src
+
 *** CPUTemp
 #+begin_src haskell :tangle src/xmobar.hs
 data MyTemp
 temperature = MultiCoreTemp (toArgs @MyTemp) 50
+
 instance MyMonitor MyTemp where
   templateString = "%multicoretemp%"
   color = "#ff647f"
@@ -797,47 +768,75 @@ instance MyMonitor MyTemp where
         ("--mintemp","20"),
         ("--maxtemp","100")
       ]
-
 #+end_src
+
 *** Memory
 #+begin_src haskell :tangle src/xmobar.hs
-
 data MyMemory
 memory = Memory (toArgs @MyMemory) 20
 
 instance MyMonitor MyMemory where
   templateString = "mem:%memory%"
   color = "#ff6600"
-  monaction = "st -e btop"
+  action = "st -e btop"
   def = [("-t", "<used>mb(<usedratio>%)")]
 #+end_src
+
+*** Volume
+#+begin_src haskell :tangle src/xmobar.hs
+data MyVolume
+volume = Alsa "default" "Master" (toArgs @MyVolume)
+
+instance MyMonitor MyVolume where
+  templateString = "%alsa:default:Master%"
+  def =
+    [("-t", "Vol: <volume>% <status>")]
+  monitorSpecific =
+      [ ("--", "")
+      , ("-C", "#00ff00")
+      ]
+#+end_src
+
 *** Updates
 #+begin_src haskell :tangle src/xmobar.hs
-checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
-checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
-                $ fontSize 6
-                $ colorize "#ff0000"
-                $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
+data MyUpdates
+updates = Com "/bin/bash" (toArgs @MyUpdates) "updates" 36000
+instance MyMonitor MyUpdates where
+  templateString = "\xf0f3 %updates% updates"
+  action = "$XDG_CONFIG_HOME/scripts/yad/update"
+  color = "#ff0000"
+  monitorSpecific = [("-c", "{ checkupdates ; yay -Qua; } | wc -l")]
 #+end_src
+
 *** Trayer
 #+begin_src haskell :tangle src/xmobar.hs
+data MyTrayer
 trayer = XPropertyLog "_XMONAD_STRAYPAD"
-trayerTemplate = "%_XMONAD_STRAYPAD%"
+instance MyMonitor MyTrayer where
+  templateString = "%_XMONAD_STRAYPAD%"
 #+end_src
+
 *** Date
 #+begin_src haskell :tangle src/xmobar.hs
-datetime = Date "<fc=#00d5c8>%I:%M</fc> %b %d %Y" "date" 10
-dateTemplate = fontSize 6
-             $ colorize "#e0a5ff"
-             $ dtBox "<fn=5>\x1f551</fn> %date%" "Bottom" "#e0a5ff"
+data MyDate
+datetime = Date (concat $ toArgs @MyDate) "date" 20
+
+instance MyMonitor MyDate where
+  templateString = "%date%"
+  color = "#40a5ff"
+  toArgs = ["%I:%M %b %d %Y"]
 #+end_src
+
 *** Kbd
 #+begin_src haskell :tangle src/xmobar.hs
-kbd = Kbd []
-kbdTemplate = colorize "#ff85ac"
-            $ fontSize 6
-            $ dtBox "\x2328 %kbd%" "Bottom" "#ff85ac"
+data MyKbd
+kbd = Kbd [("us","US"),("ara","AR")]
+
+instance MyMonitor MyKbd where
+  templateString = "%kbd%"
+  color = "#ff85aa"
 #+end_src
+
 ** Main
 #+begin_src haskell :tangle src/xmobar.hs
 
@@ -852,15 +851,16 @@ config =
       overrideRedirect = True,
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
-        ++ checkUpdatesTemplate
+        ++ monitorTemplate @MyUpdates
+        ++ monitorTemplate @MyVolume
         ++ monitorTemplate @MyBrightness
         ++ monitorTemplate @MyTemp
         ++ monitorTemplate @MyMemory
         ++ monitorTemplate @MyCpu
-        ++ dateTemplate
-        ++ kbdTemplate
+        ++ monitorTemplate @MyDate
+        ++ monitorTemplate @MyKbd
         ++ monitorTemplate @MyBattery
-        ++ trayerTemplate ,
+        ++ monitorTemplate @MyTrayer ,
 
       font = "Hack Bold Italic 8",
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
@@ -880,7 +880,8 @@ config =
         , Run trayer
         , Run cpu
         , Run temperature
-        , Run checkUpdates
+        , Run updates
+        , Run volume
         ],
       alignSep = "}{",
       sepChar  = "%"

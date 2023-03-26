@@ -57,6 +57,7 @@ import XMonad.Util.Run
 
   -- MyLib
 import Color.Theme
+import Contrib.Hidden
 
 myTerminal :: String
 myTerminal = "alacritty"
@@ -238,17 +239,21 @@ mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
 mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
 resizableTiled = renamed [Replace "tall"]
+               $ hiddenWindows
                $ mySpacing defaultGapSize defaultGapSize
                $ ResizableTall 1 (3 / 100) (1 / 2) []
 
 threeColMid = renamed [Replace "threeColMid"]
+            $ hiddenWindows
             $ mySpacing defaultGapSize defaultGapSize
             $ ResizableThreeColMid 1 (3 / 100) (1 / 2) []
 
 threeCol = renamed [Replace "threeCol"]
-            $ mySpacing defaultGapSize defaultGapSize
-            $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
+         $ hiddenWindows
+         $ mySpacing defaultGapSize defaultGapSize
+         $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
 tabLayout = renamed [Replace "tabs"]
+          $ hiddenWindows
           $ tabbed shrinkText tabLayoutTheme
 
 grid = renamed [Replace "grid"] $ mySpacing defaultGapSize defaultGapSize Grid
@@ -330,13 +335,16 @@ myKeysSections conf =
                , ("M-S-a"        , addName "\tKill all copies of the focused window"     $ killAllOtherCopies)
                , ("M-k"          , addName "\tFocus the next window"                     $ windows W.focusDown)
                , ("M-j"          , addName "\tFocus the previous window"                 $ windows W.focusUp)
-               , ("M-S-<Return>"   , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
+               , ("M-S-<Return>" , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
                , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ windows W.swapDown)
                , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ windows W.swapUp)
                , ("M-h"          , addName "\tShrink window"       $ sendMessage Shrink)
                , ("M-l"          , addName "\tExpand window"       $ sendMessage Expand)
                , ("M-S-l"        , addName "\tMirrorShrink window" $ sendMessage MirrorShrink)
                , ("M-S-h"        , addName "\tMirrorExpand window" $ sendMessage MirrorExpand)
+               , ("M-<Backspace>", addName "\tHide the current window" $  withFocused hideWindow)
+               , ("M-S-<Backspace>" , addName "\tRestore the oldest hidden window" $ popOldestHiddenWindow)
+               , ("M-C-<Backspace>" , addName "\tShow all the hidden windows"       $ sendMessage GetHidden)
                , ("M-S-<Right>"  , addName "\tShift window to next workspace"             $ shiftToNext)
                , ("M-S-<Left>"   , addName "\tShift window to prev workspace"             $ shiftToPrev)
                , ("M-C-<Right>"  , addName "\tShift window to next workspace, then goto"  $ shiftToNext >> nextWS)

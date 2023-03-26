@@ -4,7 +4,6 @@
 import Text.Printf as P
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
-
 import Data.Maybe
 
   -- Basic
@@ -12,20 +11,6 @@ import Xmobar
 
   -- MyLib
 import Color.Theme
-
-box :: String -> String -> String -> Int -> (Int, Int, Int, Int) -> String
-box str ty color width (mt, mb, ml, mr) =
-  P.printf "<box type=%s width=%d mt=%d mb=%d ml=%d mr=%d color=%s > %s </box> " ty width mt mb ml mr color str
-
-dtBox str ty color = box str ty color 3 (0,0,0,0)
-
-colorize ::String -> String ->String
-colorize color str = "<fc=" ++ color ++ ">" ++ str ++"</fc>"
-
-fontSize :: Int->String->String
-fontSize i str = "<fn="++show i++ ">"++ str ++ "</fn>"
-
-action command str = "<action=`"++ command ++ "`>" ++ str ++"</action>"
 
 type Name = String
 type Size = Int
@@ -43,28 +28,18 @@ fontMap :: M.Map Font Int
 fontMap = M.fromList $ zip
                 [ Font name style size
                 | name <-["Hack"]
-                , size <-[8..14]
+                , size <-[6..14]
                 , style <- [Normal, Bold, Italic, BoldItalic] ]
                 [1..]
-fontList = [ (1,"Hack Bold 14")
-           , (2,"Hack Bold Italic 14")
-           , (3,"Hack Bold 12")
-           , (4,"Hack Bold Italic 12")
-           , (5,"Hack Bold 10")
-           , (6,"Hack Bold Italic 10")
-           , (7,"Hack Bold 8")
-           , (8,"Hack Bold Italic 8")
-           , (9,"Hack 8")
-           ]
 
 class MyMonitor a where
   templateString::String
   monfont::Font
   monfont = Font "Hack" BoldItalic 8
   color::String
-  color = "#0088aa"
-  monaction::String
-  monaction = ":"
+  color = "#0088ff"
+  action::String
+  action = ":"
 
   def :: [(String, String)]
   def = []
@@ -76,9 +51,10 @@ class MyMonitor a where
   toArgs = concatMap (\(x, y) -> [x, y]) ((def @a) ++ (monitorSpecific @a) )
 
   monitorTemplate :: String
-  monitorTemplate = P.printf "<action=`%s`><fn=%d><fc=%s>%s</fc></fn></action>"
-    (monaction @a)  templateFont (color @a)  (dtBox (templateString @a) "Bottom" (color @a) )
+  monitorTemplate = P.printf "<fn=%d><fc=%s><action=`%s`>%s</action></fc></fn>"
+    templateFont (color @a) (action @a) barString
     where
+      barString = templateString @a ++ "<hspace=5/><fc=#c2a2e4>\x2223</fc><hspace=5/>"
       templateFont :: Int
       templateFont = fromMaybe 1 (M.lookup (monfont @a) fontMap)
 
@@ -88,7 +64,6 @@ battery = BatteryP ["BAT1"] (toArgs @MyBattery) 360
 instance MyMonitor MyBattery where
   templateString =  "%battery%"
   color = "#ee33bb"
-
   def =
       [ ("-t", "<acstatus><left>%"),
         ("-L", "20"),
@@ -127,10 +102,11 @@ instance MyMonitor MyBrightness where
 
 data MyCpu
 cpu = MultiCpu (toArgs @MyCpu) 50
+
 instance MyMonitor MyCpu where
   templateString = "cpu:%multicpu%"
   color = "#ff8855"
-  monaction = "st -e btop"
+  action = "st -e btop"
   def =
       [ ("-t", "<total>%"),
         ("-L", "5"),
@@ -141,6 +117,7 @@ instance MyMonitor MyCpu where
 
 data MyTemp
 temperature = MultiCoreTemp (toArgs @MyTemp) 50
+
 instance MyMonitor MyTemp where
   templateString = "%multicoretemp%"
   color = "#ff647f"
@@ -163,27 +140,48 @@ memory = Memory (toArgs @MyMemory) 20
 instance MyMonitor MyMemory where
   templateString = "mem:%memory%"
   color = "#ff6600"
-  monaction = "st -e btop"
+  action = "st -e btop"
   def = [("-t", "<used>mb(<usedratio>%)")]
 
-checkUpdates = Com "/bin/bash" ["-c","{ checkupdates ; yay -Qua; } | wc -l"] "updates" 36000
-checkUpdatesTemplate = action "$XDG_CONFIG_HOME/scripts/yad/update"
-                $ fontSize 6
-                $ colorize "#ff0000"
-                $ dtBox "\xf0f3 %updates% updates" "Bottom" "#ff0000"
+data MyVolume
+volume = Alsa "default" "Master" (toArgs @MyVolume)
 
+instance MyMonitor MyVolume where
+  templateString = "%alsa:default:Master%"
+  def =
+    [("-t", "Vol: <volume>% <status>")]
+  monitorSpecific =
+      [ ("--", "")
+      , ("-C", "#00ff00")
+      ]
+
+data MyUpdates
+updates = Com "/bin/bash" (toArgs @MyUpdates) "updates" 36000
+instance MyMonitor MyUpdates where
+  templateString = "\xf0f3 %updates% updates"
+  action = "$XDG_CONFIG_HOME/scripts/yad/update"
+  color = "#ff0000"
+  monitorSpecific = [("-c", "{ checkupdates ; yay -Qua; } | wc -l")]
+
+data MyTrayer
 trayer = XPropertyLog "_XMONAD_STRAYPAD"
-trayerTemplate = "%_XMONAD_STRAYPAD%"
+instance MyMonitor MyTrayer where
+  templateString = "%_XMONAD_STRAYPAD%"
 
-datetime = Date "<fc=#00d5c8>%I:%M</fc> %b %d %Y" "date" 10
-dateTemplate = fontSize 6
-             $ colorize "#e0a5ff"
-             $ dtBox "<fn=5>\x1f551</fn> %date%" "Bottom" "#e0a5ff"
+data MyDate
+datetime = Date (concat $ toArgs @MyDate) "date" 20
 
-kbd = Kbd []
-kbdTemplate = colorize "#ff85ac"
-            $ fontSize 6
-            $ dtBox "\x2328 %kbd%" "Bottom" "#ff85ac"
+instance MyMonitor MyDate where
+  templateString = "%date%"
+  color = "#40a5ff"
+  toArgs = ["%I:%M %b %d %Y"]
+
+data MyKbd
+kbd = Kbd [("us","US"),("ara","AR")]
+
+instance MyMonitor MyKbd where
+  templateString = "%kbd%"
+  color = "#ff85aa"
 
 main :: IO ()
 main = xmobar config
@@ -196,15 +194,16 @@ config =
       overrideRedirect = True,
       template =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
-        ++ checkUpdatesTemplate
+        ++ monitorTemplate @MyUpdates
+        ++ monitorTemplate @MyVolume
         ++ monitorTemplate @MyBrightness
         ++ monitorTemplate @MyTemp
         ++ monitorTemplate @MyMemory
         ++ monitorTemplate @MyCpu
-        ++ dateTemplate
-        ++ kbdTemplate
+        ++ monitorTemplate @MyDate
+        ++ monitorTemplate @MyKbd
         ++ monitorTemplate @MyBattery
-        ++ trayerTemplate ,
+        ++ monitorTemplate @MyTrayer ,
 
       font = "Hack Bold Italic 8",
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
@@ -224,7 +223,8 @@ config =
         , Run trayer
         , Run cpu
         , Run temperature
-        , Run checkUpdates
+        , Run updates
+        , Run volume
         ],
       alignSep = "}{",
       sepChar  = "%"
