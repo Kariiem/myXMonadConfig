@@ -77,7 +77,7 @@ instance MyMonitor MyBattery where
         ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),  -- off AC, discharging
         ("-p", "green"),
         ("-A", "30"),
-        ("-a", "notify-send -u critical 'Battery is running out!'")
+        ("-a", "status=$(cat /sys/class/power_supply/BAT1/status); [ \"$status\" = \"Discharging\" ] && notify-send -u critical \"Battery is running out!\" ")
       ]
 
 data MyBrightness
@@ -196,7 +196,7 @@ config =
         " <icon=haskell.xpm/> %UnsafeXMonadLog% }{"
         ++ monitorTemplate @MyUpdates
         ++ monitorTemplate @MyVolume
-        ++ monitorTemplate @MyBrightness
+--        ++ monitorTemplate @MyBrightness
         ++ monitorTemplate @MyTemp
         ++ monitorTemplate @MyMemory
         ++ monitorTemplate @MyCpu
@@ -217,7 +217,7 @@ config =
         [ Run UnsafeXMonadLog
         , Run memory
         , Run kbd
-        , Run brightness
+--        , Run brightness
         , Run battery
         , Run datetime
         , Run trayer

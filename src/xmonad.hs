@@ -4,6 +4,7 @@
 import Data.Map qualified as M
 import Data.Monoid
 import System.Exit
+import Text.Printf
 import System.IO
 import Control.Arrow (first, (&&&))
 import Data.Ord
@@ -14,25 +15,28 @@ import XMonad.Prelude
 import XMonad.StackSet qualified as W
 
   -- Layouts
+import XMonad.Layout.BorderResize
+import XMonad.Layout.BoringWindows qualified as BW
+import XMonad.Layout.Decoration
+import XMonad.Layout.Grid
+import XMonad.Layout.Minimize
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
-import XMonad.Layout.ResizableThreeColumns
-import XMonad.Layout.Spacing
-import XMonad.Layout.Decoration
-import XMonad.Layout.SimplestFloat
-import XMonad.Layout.Grid
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
+import XMonad.Layout.ResizableThreeColumns
 import XMonad.Layout.ResizableTile
-import XMonad.Layout.WindowArranger
-import XMonad.Layout.BorderResize
+import XMonad.Layout.SimplestFloat
+import XMonad.Layout.Spacing
 import XMonad.Layout.Tabbed
+import XMonad.Layout.WindowArranger
 
   -- Actions
 import XMonad.Actions.SpawnOn
 import XMonad.Actions.MouseResize
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS
+import XMonad.Actions.Minimize
 
   -- Hooks
 import XMonad.Hooks.InsertPosition
@@ -46,6 +50,7 @@ import XMonad.Hooks.SetWMName
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageHelpers
+
   -- Utils
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
@@ -54,10 +59,11 @@ import XMonad.Util.Hacks qualified as Hacks
 import XMonad.Util.ClickableWorkspaces
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
+import XMonad.Util.NamedWindows
+import XMonad.Util.Dmenu
 
   -- MyLib
 import Color.Theme
-import Contrib.Hidden
 
 myTerminal :: String
 myTerminal = "alacritty"
@@ -103,7 +109,7 @@ sysMonitor :: String
 sysMonitor = "btop"
 
 myWorkspaces :: [String]
-myWorkspaces = ["fecu","home","gsoc","www","dev","freebsd","guix","mariadb","sys-mon"] --map show [1..9::Int]
+myWorkspaces = ["fecu1","fecu2","fecu3","docs","www","dev","freebsd","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
   [ -- run htop in xterm, find it by title, use default floating window placement
@@ -130,7 +136,7 @@ myPP =
       ppLayout = xmobarFont 5 . xmobarColor (colorBPurple theme) "" ,
       ppSep = " ",
       ppWsSep = " ",
-      ppExtras = [windowCount],
+      ppExtras = [windowCount, hiddenWindowCount],
       ppTitle = xmobarColor (colorFore theme) "" . shorten 40,
       ppHidden = xmobarColor (colorCyan theme) "",
       ppHiddenNoWindows = xmobarColor (colorGrey theme) "",
@@ -149,6 +155,12 @@ windowCount =
     . W.current
     . windowset
     <$> get
+hiddenWindowCount =   Just
+    . ("/ "++)
+    . xmobarColor (colorYellow theme) ""
+    . show
+    . length
+    <$> minimizedWindows
 
 mySB :: StatusBarConfig
 mySB =
@@ -171,9 +183,10 @@ myStartupHook = do
   spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
   spawnOnce "nm-applet"
   spawnOnce "blueman-applet"
-  spawnOnce "pa-applet"
+  -- spawnOnce "pa-applet"
   spawnOnce "picom"
   spawn trayer2
+
 
 trayer1 = "killall trayer ; sleep 2 && trayer --edge top \
           \--align right \
@@ -239,37 +252,44 @@ mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
 mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
 resizableTiled = renamed [Replace "tall"]
-               $ hiddenWindows
+               $ minimize
                $ mySpacing defaultGapSize defaultGapSize
                $ ResizableTall 1 (3 / 100) (1 / 2) []
 
 threeColMid = renamed [Replace "threeColMid"]
-            $ hiddenWindows
+            $ minimize
             $ mySpacing defaultGapSize defaultGapSize
             $ ResizableThreeColMid 1 (3 / 100) (1 / 2) []
 
 threeCol = renamed [Replace "threeCol"]
-         $ hiddenWindows
+         $ minimize
          $ mySpacing defaultGapSize defaultGapSize
          $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
+
 tabLayout = renamed [Replace "tabs"]
-          $ hiddenWindows
+          $ minimize
           $ tabbed shrinkText tabLayoutTheme
 
-grid = renamed [Replace "grid"] $ mySpacing defaultGapSize defaultGapSize Grid
+grid = renamed [Replace "grid"]
+     $ minimize
+     $ mySpacing defaultGapSize defaultGapSize Grid
 
-full = renamed [Replace "monocle"] $ mySpacing defaultGapSize defaultGapSize Full
+full = renamed [Replace "monocle"]
+     $ minimize
+     $ mySpacing defaultGapSize defaultGapSize Full
 
 myFloat = renamed [Replace "float"]
-        . mouseResize
-        . borderResize
-        . windowArrangeAll
+        $ minimize
+        $ mouseResize
+        $ borderResize
+        $ windowArrangeAll
         $ simplestFloat
 
 myLayout = avoidStruts
          . smartBorders
          . mkToggle (NOBORDERS ?? FULL ?? EOT)
-         . mkToggle (single MIRROR) $ lll -- . avoidStruts lll
+         . mkToggle (single MIRROR)
+         . BW.boringWindows $ lll -- . avoidStruts lll
   where
     lll =
             resizableTiled
@@ -298,7 +318,7 @@ myKeysSections :: XConfig Layout -> [KeySection]
 myKeysSections conf =
   [ KeySection "XMonad Controls"
                [ ("M-q"          , addName "\tRestart XMonad"                $ sbCleanupHook mySB >> spawn "xmonad --restart")
-               , ("M-r"          , addName "\tRecompile XMonad"              $ spawn "xmonad --recompile")
+               , ("M-r"          , addName "\tRecompile XMonad"              $ spawn "xmonad --recompile && dunstify -t 300 'XMonad recompiled successfully'")
                , ("M-S-c"        , addName "\tKill the focused application"  $ kill1)
                , ("M-S-q"        , addName "\tExit XMonad"                   $ io exitSuccess)
                , ("M-S-r"        , addName "\tRefresh XMonad"                $ refresh)
@@ -333,8 +353,8 @@ myKeysSections conf =
   , KeySection "Window Controls"
                [ ("M-C-a"        , addName "\tCopy the focused window to all workspaces" $ windows copyToAll)
                , ("M-S-a"        , addName "\tKill all copies of the focused window"     $ killAllOtherCopies)
-               , ("M-k"          , addName "\tFocus the next window"                     $ windows W.focusDown)
-               , ("M-j"          , addName "\tFocus the previous window"                 $ windows W.focusUp)
+               , ("M-k"          , addName "\tFocus the next window"                     $ BW.focusDown)
+               , ("M-j"          , addName "\tFocus the previous window"                 $ BW.focusUp)
                , ("M-S-<Return>" , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
                , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ windows W.swapDown)
                , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ windows W.swapUp)
@@ -342,9 +362,9 @@ myKeysSections conf =
                , ("M-l"          , addName "\tExpand window"       $ sendMessage Expand)
                , ("M-S-l"        , addName "\tMirrorShrink window" $ sendMessage MirrorShrink)
                , ("M-S-h"        , addName "\tMirrorExpand window" $ sendMessage MirrorExpand)
-               , ("M-<Backspace>", addName "\tHide the current window" $  withFocused hideWindow)
-               , ("M-S-<Backspace>" , addName "\tRestore the oldest hidden window" $ popOldestHiddenWindow)
-               , ("M-C-<Backspace>" , addName "\tShow all the hidden windows"       $ sendMessage GetHidden)
+               , ("M-<Backspace>", addName "\tHide the current window" $  withFocused minimizeWindow)
+               , ("M-S-<Backspace>" , addName "\tRestore the oldest hidden window" $ withLastMinimized maximizeWindow)
+               , ("M-C-<Backspace>" , addName "\tShow all the hidden windows"      $ listAllMinimized)
                , ("M-S-<Right>"  , addName "\tShift window to next workspace"             $ shiftToNext)
                , ("M-S-<Left>"   , addName "\tShift window to prev workspace"             $ shiftToPrev)
                , ("M-C-<Right>"  , addName "\tShift window to next workspace, then goto"  $ shiftToNext >> nextWS)
@@ -404,8 +424,8 @@ myKeysSections conf =
                [ ("<XF86AudioRaiseVolume>"     , addName "\tInc Volume"          $ spawn $ volumeControls M.! "inc")
                , ("<XF86AudioLowerVolume>"     , addName "\tDec Volume"          $ spawn $ volumeControls M.! "dec")
                , ("<XF86AudioMute>"            , addName "\tToggle Volume"       $ spawn $ volumeControls M.! "tog")
-               , ("<XF86MonBrightnessUp>"      , addName "\tInc Brightness"      $ spawn "light -A 10")
-               , ("<XF86MonBrightnessDown>"    , addName "\tInc Brightness"      $ spawn "light -U 10")
+               , ("<XF86MonBrightnessUp>"      , addName "\tInc Brightness"      $ spawn $ scriptPath "misc" "bright inc")
+               , ("<XF86MonBrightnessDown>"    , addName "\tDec Brightness"      $ spawn $ scriptPath "misc" "bright dec")
                , ("M-<Print>"                  , addName "\tTake a Screnshot"    $ spawn "maim -u ~/Pictures/Screenshots/\"$(date)\".png")
                , ("<XF86AudioPlay>"            , addName "\tResume/Pause"        $ spawn "mocp --toggle-pause"    )
                ]
@@ -417,8 +437,6 @@ myKeys conf = concatMap (\(KeySection title keys) -> subTitle title keys) (myKey
       where
         subTitle str keys = (subtitle str) : mkNamedKeymap conf keys
 
-
-
 toggleSpaces :: X ()
 toggleSpaces = toggleScreenSpacingEnabled >> toggleWindowSpacingEnabled
 
@@ -429,6 +447,25 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
     , ((modm .|. controlMask, button1) , \w -> focus w >> windows W.shiftMaster)
     , ((modm .|. shiftMask, button1)   , \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
     ]
+
+minimizedWindows = withMinimized return
+
+listAllMinimized = minimizedWindows >>= mapM winInfo >>= action
+   where
+     winInfo w = do
+                    name <- getNameWMClass w
+                    title <- getName w
+                    let str = printf "%-60s %-60s %s" ("["++ show w ++"]") (show name) (show title)
+                    return str -- (w, title, name)
+
+     action ws = if null ws
+                 then io . spawn $ "notify-send -t 400 \"There are no hidden windows\""
+                 else do
+                        selString  <- io . myDmenu . sort $ ws
+                        let winId:_ = read (takeWhile (not.isSpace) selString):: [Window]
+                        maximizeWindow winId
+
+     myDmenu = menuArgs "dmenu" ["-z","1910","-l","10","-p","select window: "]
 
 yad = "yad --undecorated --no-buttons --text-info --text-align=left --fontname=\"Hack 12\" --fore="
     ++ colorBBlue theme ++ " --back=" ++ colorBlack theme ++ " --geometry=1400x800"
