@@ -27,7 +27,6 @@ library
   exposed-modules:
       Color.MyPalette
       Color.Theme
-      Contrib.Hidden
       TH.Theme
   other-modules:
       Paths_xmonad_config

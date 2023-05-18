@@ -2,15 +2,15 @@
 # to be used for project dependencies.
 resolver: 
   #ghc-9.0.2
-  nightly-2022-11-05
+  lts-20.19
 
 # User packages to be built.
 packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver.
 extra-deps:
-- xmobar-0.46
-- netlink-1.1.1.0
+ - xmobar-0.46
+ - netlink-1.1.1.0
 # Override default flag values for local packages and extra-deps
 
 # Control whether we use the GHC we find on the path
@@ -18,9 +18,9 @@ system-ghc: true
 
 
 flags:
- xmobar:
-   all_extensions: true
-   with_threaded: true
+  xmobar:
+    all_extensions: true
+    with_threaded: true
 
 ghc-options:
   $everything: '-O2'

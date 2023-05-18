@@ -27,7 +27,7 @@ fontToString (Font name style i) = name ++ " " ++ show style ++ " " ++ show i
 fontMap :: M.Map Font Int
 fontMap = M.fromList $ zip
                 [ Font name style size
-                | name <-["Hack"]
+                | name <-["Hack","JetBrains Mono"]
                 , size <-[6..14]
                 , style <- [Normal, Bold, Italic, BoldItalic] ]
                 [1..]
@@ -35,7 +35,7 @@ fontMap = M.fromList $ zip
 class MyMonitor a where
   templateString::String
   monfont::Font
-  monfont = Font "Hack" BoldItalic 8
+  monfont = Font "JetBrains Mono" Bold 9
   color::String
   color = "#0088ff"
   action::String
@@ -73,7 +73,7 @@ instance MyMonitor MyBattery where
   monitorSpecific =
       [ ("--", ""),
         ("-i", "<fc=#0088aa>Full</fc>"), -- idle AC, fully charged
-        ("-O", "\x1F50C"), -- \xf583"   -- On AC, charging
+        ("-O", "<fn=10>\x1f50c</fn>"), -- \xf583"   -- On AC, charging
         ("-o", "<fc=#33aa55><fn=1>\xf242 </fn></fc>"),  -- off AC, discharging
         ("-p", "green"),
         ("-A", "30"),
@@ -161,7 +161,7 @@ instance MyMonitor MyUpdates where
   templateString = "\xf0f3 %updates% updates"
   action = "$XDG_CONFIG_HOME/scripts/yad/update"
   color = "#ff0000"
-  monitorSpecific = [("-c", "{ checkupdates ; yay -Qua; } | wc -l")]
+  monitorSpecific = [("-c", "{ checkupdates ; aur -Qua; } | wc -l")]
 
 data MyTrayer
 trayer = XPropertyLog "_XMONAD_STRAYPAD"
@@ -205,7 +205,8 @@ config =
         ++ monitorTemplate @MyBattery
         ++ monitorTemplate @MyTrayer ,
 
-      font = "Hack Bold Italic 8",
+      font = "JetBrains Mono 9" --"Hack Bold Italic 8"
+    ,
       position = TopHM 25 10 10 5 5, -- Height, left/right margins, top/down margins
       additionalFonts = map (fontToString.fst) $ L.sortOn snd $ M.toList fontMap ,--map snd fontList,
       allDesktops = True,

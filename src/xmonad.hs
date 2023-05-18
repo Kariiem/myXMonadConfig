@@ -1,4 +1,4 @@
-
+{-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses #-}
 
   -- Builtin
 import Data.Map qualified as M
@@ -27,9 +27,11 @@ import XMonad.Layout.Renamed
 import XMonad.Layout.ResizableThreeColumns
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
+import XMonad.Layout.SimpleFloat
 import XMonad.Layout.Spacing
 import XMonad.Layout.Tabbed
 import XMonad.Layout.WindowArranger
+import XMonad.Layout.Simplest
 
   -- Actions
 import XMonad.Actions.SpawnOn
@@ -61,6 +63,10 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.NamedWindows
 import XMonad.Util.Dmenu
+
+  -- Prompts
+import XMonad.Prompt
+import XMonad.Prompt.Shell
 
   -- MyLib
 import Color.Theme
@@ -106,7 +112,7 @@ volumeControls = M.fromList [ ("inc", "pactl set-sink-volume @DEFAULT_SINK@ +100
                             ]
 
 sysMonitor :: String
-sysMonitor = "btop"
+sysMonitor = "btm"
 
 myWorkspaces :: [String]
 myWorkspaces = ["fecu1","fecu2","fecu3","docs","www","dev","freebsd","sys-mon"] --map show [1..9::Int]
@@ -133,10 +139,10 @@ myPP =
   def
     { ppCurrent = xmobarColor (colorRed theme) "" . xmobarBorder "Bottom" (colorRed theme) 0  ,
       ppUrgent = xmobarColor (colorGreen theme) (colorBPurple theme),
-      ppLayout = xmobarFont 5 . xmobarColor (colorBPurple theme) "" ,
+      ppLayout = xmobarColor (colorBPurple theme) "" ,
       ppSep = " ",
       ppWsSep = " ",
-      ppExtras = [windowCount, hiddenWindowCount],
+      ppExtras = [activeWindowCount, hiddenWindowCount],
       ppTitle = xmobarColor (colorFore theme) "" . shorten 40,
       ppHidden = xmobarColor (colorCyan theme) "",
       ppHiddenNoWindows = xmobarColor (colorGrey theme) "",
@@ -155,6 +161,12 @@ windowCount =
     . W.current
     . windowset
     <$> get
+
+activeWindowCount =  do
+  w <- length . W.integrate' . W.stack . W.workspace . W.current . windowset <$> get
+  h <- length <$> minimizedWindows
+  return . Just . xmobarColor (colorGreen theme) "" . show $ w - h
+
 hiddenWindowCount =   Just
     . ("/ "++)
     . xmobarColor (colorYellow theme) ""
@@ -180,11 +192,12 @@ myStartupHook = do
   -- spawnOnce "sxhkd"
   -- spawnOnce "emacs --with-profile doom-emacs --daemon &"
   -- spawnOnce "emacs --with-profile vanilla-emacs --daemon &"
-  spawnOnOnce "sys-mon" ("st -e "++ sysMonitor)
+  spawnOnce "lxsession -e XMonad -a -n"
   spawnOnce "nm-applet"
   spawnOnce "blueman-applet"
-  -- spawnOnce "pa-applet"
   spawnOnce "picom"
+  -- spawnOnce "alttab -w 1 -d 1"
+  spawnOnOnce "sys-mon" ("st -e " ++ sysMonitor)
   spawn trayer2
 
 
@@ -234,17 +247,19 @@ myManageHook =
     [ manageSpawn
     , insertPosition Below Newer
     , namedScratchpadManageHook scratchpads
-    , className =? "jetbrains-idea-ce"  --> doFloat
+--    , className =? "jetbrains-idea-ce"  --> doFloat
     , className =? "dialog"             --> doFloat
     , className =? "download"           --> doFloat
     , className =? "notification"       --> doFloat
     , className =? "Xmessage"           --> doFloat
     , className =? "Yad"                --> doCenterFloat
+    , className =? "Qalculate-gtk"      --> doCenterFloat
     -- The following line causes the trayer (stalonetray) to hide on <toggleStruts>
     -- and on full screen events
     , className =? "stalonetray"
       <||> className =? "trayer"
       <||> className =? "panel"         --> doLower
+    , className =? "Screenkey"          --> doFloat
     , placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
     ]
 
@@ -252,44 +267,40 @@ mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
 mySpacing i j = spacingRaw False (Border i i i i) True (Border j j j j) True
 
 resizableTiled = renamed [Replace "tall"]
-               $ minimize
                $ mySpacing defaultGapSize defaultGapSize
                $ ResizableTall 1 (3 / 100) (1 / 2) []
 
 threeColMid = renamed [Replace "threeColMid"]
-            $ minimize
             $ mySpacing defaultGapSize defaultGapSize
             $ ResizableThreeColMid 1 (3 / 100) (1 / 2) []
 
 threeCol = renamed [Replace "threeCol"]
-         $ minimize
          $ mySpacing defaultGapSize defaultGapSize
          $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
 
 tabLayout = renamed [Replace "tabs"]
-          $ minimize
           $ tabbed shrinkText tabLayoutTheme
 
 grid = renamed [Replace "grid"]
-     $ minimize
      $ mySpacing defaultGapSize defaultGapSize Grid
 
 full = renamed [Replace "monocle"]
-     $ minimize
      $ mySpacing defaultGapSize defaultGapSize Full
 
 myFloat = renamed [Replace "float"]
-        $ minimize
-        $ mouseResize
-        $ borderResize
-        $ windowArrangeAll
-        $ simplestFloat
+     --   $ mouseResize
+     --   $ borderResize
+     --   $ windowArrangeAll
+        $ simpleFloat' shrinkText floatLayoutTheme
 
 myLayout = avoidStruts
          . smartBorders
-         . mkToggle (NOBORDERS ?? FULL ?? EOT)
-         . mkToggle (single MIRROR)
-         . BW.boringWindows $ lll -- . avoidStruts lll
+         . mkToggle (NOBORDERS ?? FULL ?? EOT )
+         . mkToggle (single MIRROR )
+         . renamed [KeepWordsRight 1]
+         . minimize
+         . BW.boringWindows
+         $ lll -- . avoidStruts lll
   where
     lll =
             resizableTiled
@@ -312,6 +323,25 @@ tabLayoutTheme = def { activeColor = colorBlue theme
                      , decoHeight = 30
                      }
 
+floatLayoutTheme = def { activeColor = colorBlue theme
+                     , inactiveColor = colorGrey theme
+                     , activeTextColor = colorFore theme
+                     , inactiveTextColor = colorFore theme
+                     , fontName = "xft:Ubuntu:bold"
+                     , inactiveBorderWidth = 0
+                     , activeBorderWidth = 0
+                     , urgentBorderWidth = 0
+                     , decoHeight = 30
+                     }
+
+myXPConfig = def { bgColor = "#043850"
+                 , fgColor = "#ea96fa"
+                 , font = "xft:Hack:size=12"
+                 , position = CenteredAt 0.3 (fromRational 2/3)
+                 , promptBorderWidth = 0
+                 , height = 30
+                 , maxComplRows = Just 10
+                 }
 data KeySection = KeySection String {-Title-} [(String,NamedAction)] {- keys -}
 
 myKeysSections :: XConfig Layout -> [KeySection]
@@ -326,6 +356,7 @@ myKeysSections conf =
                ]
   , KeySection "Dmenu & YAD Scripts"
                [ ("M-<Space>"    , addName "\tDmenu app launcher"            $ spawn $ scriptPath "dmenu" "run-recent" )
+              -- ("M-<Space>"    , addName "\tXMonad Shell Prompt"           $ shellPrompt myXPConfig)
                , ("M-d c"        , addName "\tChange color theme"            $ spawn $ scriptPath "dmenu" "theme" )
                , ("M-d x"        , addName "\tExit prompt "                  $ spawn $ scriptPath "dmenu" "poweropts")
                , ("M-d p"        , addName "\tPdf history"                   $ spawn $ scriptPath "dmenu" "pdfhist")
@@ -335,9 +366,12 @@ myKeysSections conf =
                , ("M-p"          , addName "\tPassmenu"                      $ spawn $ scriptPath "dmenu" "pass")
                ]
   , KeySection "Applications"
-               [ ("M-<Return>" , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
+               [ ("M-<Return>"   , addName ("\tOpen a new terminal ("++myTerminal++")") $ spawn (terminal conf))
                , ("M-e d"        , addName "\tLaunch Doom Emacs"                        $ spawn $ scriptPath "misc" "doom")
                , ("M-e v"        , addName "\tLaunch vanilla Emacs"                     $ spawn $ scriptPath "misc" "vanilla")
+               , ("M-f m"        , addName "\tLaunch fff file manager"                  $ spawn "st -e fff")
+            -- this is here due to a limitation of the key section scheme
+               , ("M-f f"        , addName "\tMake the focused window Fullscreen"       $ toggleFull)
                ]
   , KeySection "Layout Controls"
                [ ("M-S-<Tab>"    , addName "\tReset the window layout"             $ setLayout $ layoutHook conf)
@@ -356,8 +390,8 @@ myKeysSections conf =
                , ("M-k"          , addName "\tFocus the next window"                     $ BW.focusDown)
                , ("M-j"          , addName "\tFocus the previous window"                 $ BW.focusUp)
                , ("M-S-<Return>" , addName "\tSwap the focused window with the master window"   $ windows W.swapMaster)
-               , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ windows W.swapDown)
-               , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ windows W.swapUp)
+               , ("M-S-k"        , addName "\tSwap the focused window with the next window"     $ BW.swapDown)
+               , ("M-S-j"        , addName "\tSwap the focused window with the previous window" $ BW.swapUp)
                , ("M-h"          , addName "\tShrink window"       $ sendMessage Shrink)
                , ("M-l"          , addName "\tExpand window"       $ sendMessage Expand)
                , ("M-S-l"        , addName "\tMirrorShrink window" $ sendMessage MirrorShrink)
@@ -367,8 +401,8 @@ myKeysSections conf =
                , ("M-C-<Backspace>" , addName "\tShow all the hidden windows"      $ listAllMinimized)
                , ("M-S-<Right>"  , addName "\tShift window to next workspace"             $ shiftToNext)
                , ("M-S-<Left>"   , addName "\tShift window to prev workspace"             $ shiftToPrev)
-               , ("M-C-<Right>"  , addName "\tShift window to next workspace, then goto"  $ shiftToNext >> nextWS)
-               , ("M-C-<Left>"   , addName "\tShift window to prev workspace, then goto"  $ shiftToPrev >> prevWS)
+               , ("M-C-<Right>"  , addName "\tShift window and focus to next workspace"   $ shiftToNext >> nextWS)
+               , ("M-C-<Left>"   , addName "\tShift window and focus to prev workspace"   $ shiftToPrev >> prevWS)
                ]
   , KeySection "Floating Layouts Controls"
                [ ("M-M1-<Left>"  , addName "\tMove window left by 10 pixels"      $ sendMessage (MoveLeft 10))
@@ -467,6 +501,16 @@ listAllMinimized = minimizedWindows >>= mapM winInfo >>= action
 
      myDmenu = menuArgs "dmenu" ["-z","1910","-l","10","-p","select window: "]
 
+
+
+
+data MyTransformers = MFULL deriving (Read,Show,Eq)
+
+instance Transformer MyTransformers Window where
+  transform MFULL x k = k full (const x)
+
+toggleFull = sendMessage (Toggle FULL) >> sendMessage ToggleStruts
+
 yad = "yad --undecorated --no-buttons --text-info --text-align=left --fontname=\"Hack 12\" --fore="
     ++ colorBBlue theme ++ " --back=" ++ colorBlack theme ++ " --geometry=1400x800"
 
@@ -504,8 +548,8 @@ main = do
     xmonad
       . withSB mySB
       . docks
-      . ewmhFullscreen
       . ewmh
+      . ewmhFullscreen
       $ addDescrKeys' ((mod4Mask, xK_F1), yadShowKeymaps) myKeys myXConfig
 
 myXConfig = def
