@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -36,11 +36,48 @@ library
       ImportQualifiedPost
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2
   build-depends:
-      base >=4.7 && <5
+      X11 >=1.8
+    , base >=4.7 && <5
     , containers
+    , data-default
+    , directory
+    , filepath
+    , gi-gdk
+    , gtk-strut
+    , gtk3
+    , taffybar
     , template-haskell
+    , transformers
     , xmobar
     , xmonad
+    , xmonad-contrib
+  default-language: Haskell2010
+
+executable taffybar
+  main-is: taffybar.hs
+  other-modules:
+      Paths_xmonad_config
+  hs-source-dirs:
+      src
+  default-extensions:
+      ImportQualifiedPost
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      X11 >=1.8
+    , base >=4.7 && <5
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , gi-gdk
+    , gtk-strut
+    , gtk3
+    , taffybar
+    , template-haskell
+    , transformers
+    , xmobar
+    , xmonad
+    , xmonad-config
     , xmonad-contrib
   default-language: Haskell2010
 
@@ -54,9 +91,18 @@ executable xmobar
       ImportQualifiedPost
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
-      base >=4.7 && <5
+      X11 >=1.8
+    , base >=4.7 && <5
     , containers
+    , data-default
+    , directory
+    , filepath
+    , gi-gdk
+    , gtk-strut
+    , gtk3
+    , taffybar
     , template-haskell
+    , transformers
     , xmobar
     , xmonad
     , xmonad-config
@@ -73,9 +119,18 @@ executable xmonad
       ImportQualifiedPost
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
-      base >=4.7 && <5
+      X11 >=1.8
+    , base >=4.7 && <5
     , containers
+    , data-default
+    , directory
+    , filepath
+    , gi-gdk
+    , gtk-strut
+    , gtk3
+    , taffybar
     , template-haskell
+    , transformers
     , xmobar
     , xmonad
     , xmonad-config
@@ -93,9 +148,18 @@ test-suite xmonad-config-test
       ImportQualifiedPost
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      X11 >=1.8
+    , base >=4.7 && <5
     , containers
+    , data-default
+    , directory
+    , filepath
+    , gi-gdk
+    , gtk-strut
+    , gtk3
+    , taffybar
     , template-haskell
+    , transformers
     , xmobar
     , xmonad
     , xmonad-config

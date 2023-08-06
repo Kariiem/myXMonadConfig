@@ -40,7 +40,6 @@ class MyMonitor a where
   color = "#0088ff"
   action::String
   action = ":"
-
   def :: [(String, String)]
   def = []
 

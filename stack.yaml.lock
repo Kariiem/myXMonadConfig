@@ -18,6 +18,27 @@ packages:
       size: 1598
   original:
     hackage: netlink-1.1.1.0
+- completed:
+    hackage: taffybar-4.0.0@sha256:667ccc958f6d793d3c4cdee3578f8586387ff3c86df02bee0ce130e115b1329b,7029
+    pantry-tree:
+      sha256: 38867928e5d44a3af92cedd5b3ada01101e4724ae1dff0e6951244cccc626bff
+      size: 6032
+  original:
+    hackage: taffybar-4.0.0
+- completed:
+    hackage: rate-limit-1.4.3@sha256:ede2fd61c08dd6bc1849a5ca777baf5b68476f33e57cca40bc7c742603969f06,963
+    pantry-tree:
+      sha256: 6480053663ee9e6e2f54534e7ca734f4d8d511e71ee42831e42ce106d54344ca
+      size: 168
+  original:
+    hackage: rate-limit-1.4.3
+- completed:
+    hackage: scotty-0.12@sha256:32a4702316f4a90ca2be65a1191b889efcb0415002fb8c7e15c8606efa6bc134,5359
+    pantry-tree:
+      sha256: 2ca8f65b151672b911c89bd2eae0de80e395174318c96c0cdc2a7bcd60754d1b
+      size: 1701
+  original:
+    hackage: scotty-0.12
 snapshots:
 - completed:
     sha256: 42f77c84b34f68c30c2cd0bf8c349f617a0f428264362426290847a6a2019b64

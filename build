@@ -21,3 +21,4 @@ stack build
 # Create a hard link at the requested destination, replacing any existing one.
 ln -f -T $(stack exec -- which $EXE_NAME) $1 
 ln -f -T $(stack exec -- which "xmobar") "/home/karim/.local/bin/xmobar"
+ln -f -T $(stack exec -- which "taffybar") "/home/karim/.local/bin/taffybar"

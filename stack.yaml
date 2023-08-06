@@ -11,6 +11,9 @@ packages:
 extra-deps:
  - xmobar-0.46
  - netlink-1.1.1.0
+ - taffybar-4.0.0
+ - rate-limit-1.4.3
+ - scotty-0.12
 # Override default flag values for local packages and extra-deps
 
 # Control whether we use the GHC we find on the path

@@ -32,6 +32,7 @@ import XMonad.Layout.Spacing
 import XMonad.Layout.Tabbed
 import XMonad.Layout.WindowArranger
 import XMonad.Layout.Simplest
+import XMonad.Layout.BinarySpacePartition
 
   -- Actions
 import XMonad.Actions.SpawnOn
@@ -52,8 +53,10 @@ import XMonad.Hooks.SetWMName
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.PositionStoreHooks
 
   -- Utils
+import qualified XMonad.Util.ExtensibleState as XS
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
 import XMonad.Util.NamedScratchpad
@@ -63,10 +66,12 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.NamedWindows
 import XMonad.Util.Dmenu
+import XMonad.Util.PositionStore
 
   -- Prompts
 import XMonad.Prompt
 import XMonad.Prompt.Shell
+import System.Taffybar.Support.PagerHints (pagerHints)
 
   -- MyLib
 import Color.Theme
@@ -118,13 +123,7 @@ myWorkspaces :: [String]
 myWorkspaces = ["fecu1","fecu2","fecu3","docs","www","dev","freebsd","sys-mon"] --map show [1..9::Int]
 
 scratchpads =
-  [ -- run htop in xterm, find it by title, use default floating window placement
-    NS "notes" "st -e nvim" (title =? "notes") defaultFloating,
-    NS
-      "stardict"
-      "stardict"
-      (className =? "Stardict")
-      (customFloating $ W.RationalRect (1 / 6) (1 / 6) (2 / 3) (2 / 3))
+  [  NS "build" "alacritty --title \"build\"" (title =? "build") doCenterFloat
   ]
 
 myLogHook :: X ()
@@ -135,7 +134,7 @@ myFadeHook :: FadeHook
 myFadeHook = composeAll []
 
 myPP :: PP
-myPP =
+myPP = filterOutWsPP ["NSP"]
   def
     { ppCurrent = xmobarColor (colorRed theme) "" . xmobarBorder "Bottom" (colorRed theme) 0  ,
       ppUrgent = xmobarColor (colorGreen theme) (colorBPurple theme),
@@ -195,10 +194,12 @@ myStartupHook = do
   spawnOnce "lxsession -e XMonad -a -n"
   spawnOnce "nm-applet"
   spawnOnce "blueman-applet"
-  spawnOnce "picom"
+  spawnOnce "flameshot"
+  -- spawnOnce "picom"
   -- spawnOnce "alttab -w 1 -d 1"
   spawnOnOnce "sys-mon" ("st -e " ++ sysMonitor)
   spawn trayer2
+  spawn "killall taffybar && taffybar"
 
 
 trayer1 = "killall trayer ; sleep 2 && trayer --edge top \
@@ -237,6 +238,7 @@ myEventHook =
     , swallowEventHook (className =? "Alacritty" <||> className =? "Termite") (return True)
     , stalonetrayAboveXmobarEventHook
     , stalonetrayPaddingXmobarEventHook
+    , positionStoreEventHook
     ]
 stalonetrayAboveXmobarEventHook = Hacks.trayAbovePanelEventHook (className =? "stalonetray") (appName =? "xmobar")
 stalonetrayPaddingXmobarEventHook = Hacks.trayPaddingXmobarEventHook (className =? "stalonetray") "_XMONAD_STRAYPAD"
@@ -247,16 +249,20 @@ myManageHook =
     [ manageSpawn
     , insertPosition Below Newer
     , namedScratchpadManageHook scratchpads
+    , positionStoreManageHook Nothing
 --    , className =? "jetbrains-idea-ce"  --> doFloat
+    , className =? "Gimp"               --> doFloat
     , className =? "dialog"             --> doFloat
     , className =? "download"           --> doFloat
     , className =? "notification"       --> doFloat
     , className =? "Xmessage"           --> doFloat
     , className =? "Yad"                --> doCenterFloat
+    , className =? "LearnOpenGL"        --> doCenterFloat
     , className =? "Qalculate-gtk"      --> doCenterFloat
     -- The following line causes the trayer (stalonetray) to hide on <toggleStruts>
     -- and on full screen events
-    , className =? "stalonetray"
+    , className =? "taffybar"
+      <||> className =? "stalonetray"
       <||> className =? "trayer"
       <||> className =? "panel"         --> doLower
     , className =? "Screenkey"          --> doFloat
@@ -277,6 +283,10 @@ threeColMid = renamed [Replace "threeColMid"]
 threeCol = renamed [Replace "threeCol"]
          $ mySpacing defaultGapSize defaultGapSize
          $ ResizableThreeCol 1 (3 / 100) (1 / 2) []
+
+bsp = renamed [Replace "BSP"]
+    $ mySpacing defaultGapSize defaultGapSize
+    $ emptyBSP
 
 tabLayout = renamed [Replace "tabs"]
           $ tabbed shrinkText tabLayoutTheme
@@ -310,13 +320,14 @@ myLayout = avoidStruts
         ||| grid
         ||| full
         ||| myFloat
+        ||| bsp
 
 tabLayoutTheme :: Theme
 tabLayoutTheme = def { activeColor = colorBlue theme
                      , inactiveColor = colorGrey theme
                      , activeTextColor = colorFore theme
                      , inactiveTextColor = colorFore theme
-                     , fontName = "xft:Ubuntu:bold"
+                     , fontName = "xft:JetBrains Mono:bold"
                      , inactiveBorderWidth = 0
                      , activeBorderWidth = 0
                      , urgentBorderWidth = 0
@@ -379,10 +390,10 @@ myKeysSections conf =
                , ("M-S-m"        , addName "\tRotate layout by 90 degrees"         $ sendMessage $ Toggle MIRROR)
                , ("M-t s"        , addName "\tToggle gaps"                         $ toggleSpaces)
                , ("M-t b"        , addName "\tToggle borders"                      $ sendMessage $ Toggle NOBORDERS)
-               , ("M-s"          , addName "\tSink a floating window"              $ withFocused $ windows . W.sink)
+               , ("M-s"          , addName "\tToggle floating/tiling a window"     $ toggleFloat)
                , ("M-,"          , addName "\tIncrease windows in the master pane" $ sendMessage (IncMasterN 1))
                , ("M-."          , addName "\tDecrease windows in the master pane" $ sendMessage (IncMasterN (-1)))
-               , ("M-S-n"        , addName "\tOpen a scratchpad"                   $ namedScratchpadAction scratchpads "notes")
+               , ("M-b"          , addName "\tOpen a scratchpad"                   $ namedScratchpadAction scratchpads "build")
                ]
   , KeySection "Window Controls"
                [ ("M-C-a"        , addName "\tCopy the focused window to all workspaces" $ windows copyToAll)
@@ -403,6 +414,8 @@ myKeysSections conf =
                , ("M-S-<Left>"   , addName "\tShift window to prev workspace"             $ shiftToPrev)
                , ("M-C-<Right>"  , addName "\tShift window and focus to next workspace"   $ shiftToNext >> nextWS)
                , ("M-C-<Left>"   , addName "\tShift window and focus to prev workspace"   $ shiftToPrev >> prevWS)
+               , ("M-C-j"      , addName "" $ sendMessage $ SplitShift Prev)
+               , ("M-C-k"      , addName "" $ sendMessage $ SplitShift Next)
                ]
   , KeySection "Floating Layouts Controls"
                [ ("M-M1-<Left>"  , addName "\tMove window left by 10 pixels"      $ sendMessage (MoveLeft 10))
@@ -477,10 +490,62 @@ toggleSpaces = toggleScreenSpacingEnabled >> toggleWindowSpacingEnabled
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings XConfig {XMonad.modMask = modm} =
   M.fromList
-    [ ((modm, button1)                 , \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster )
+    [ ((modm, button1)                 , \w -> focus w >> updatePositionStore w mouseMoveWindow  >> windows W.shiftMaster )
     , ((modm .|. controlMask, button1) , \w -> focus w >> windows W.shiftMaster)
-    , ((modm .|. shiftMask, button1)   , \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
+    , ((modm .|. shiftMask, button1)   , \w -> focus w >> updatePositionStore w mouseResizeWindow >> windows W.shiftMaster)
     ]
+
+data WindowSizeState = Tiled | Float !Rational !Rational deriving (Eq,Show,Read)
+newtype PerWindowSizeState = PW (M.Map Window WindowSizeState)
+instance ExtensionClass PerWindowSizeState where
+  initialValue = Tiled
+  extensionType = PersistentExtension
+
+updatePositionStore w f = do
+                        rect <- winRectangle w
+                        f w
+                        rect' <- winRectangle w
+                        modifyPosStore $ \ps -> posStoreInsert ps w rect rect'
+
+winRectangle w = do
+   (_, rationalRect) <- floatLocation w
+   viewrect <- screenRect . W.screenDetail . W.current .  windowset <$> get
+   return $ scaleRationalRect viewrect rationalRect
+
+
+-- If the window is floating then (f), if tiled then (n)
+floatOrNot f n = withFocused $ \windowId -> do
+    floats <- gets (W.floating . windowset)
+    withFocused $ if windowId `M.member` floats -- if the current window is floating...
+       then
+         \win ->  do
+           (_, W.RationalRect x y w h) <- floatLocation win
+           case x of
+                0.25 -> windows $ W.float win (W.RationalRect 0.125 0.125 0.75 0.75)
+                _ -> f win
+       else n
+
+centreRect = W.RationalRect 0.25 0.25 0.5 0.5
+-- Centre and float a window (retain size)
+centreFloat win = windows $ W.float win centreRect
+
+-- Make a window my 'standard size' (half of the screen) keeping the centre of the window fixed
+standardSize win = do
+    (_, W.RationalRect x y w h) <- floatLocation win
+    windows $ W.float win (W.RationalRect x y 0.5 0.5)
+    return ()
+
+floatRestorePosition w = do
+       ps <- getPosStore
+       rect <- winRectangle w
+       let found = posStoreQuery ps w rect
+       case found of
+         Nothing -> centreFloat w
+         Just rectangle -> return () -- windows $ W.float w rectangle
+
+
+-- Float and centre a tiled window, sink a floating window
+toggleFloat = floatOrNot (windows . W.sink) (\w-> updatePositionStore w centreFloat)
 
 minimizedWindows = withMinimized return
 
@@ -550,6 +615,7 @@ main = do
       . docks
       . ewmh
       . ewmhFullscreen
+      . pagerHints
       $ addDescrKeys' ((mod4Mask, xK_F1), yadShowKeymaps) myKeys myXConfig
 
 myXConfig = def

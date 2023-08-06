@@ -9,5 +9,8 @@ cradle:
     - path: "./src/xmonad.hs"
       component: "xmonad-config:exe:xmonad"
 
+    - path: "./src/taffybar.hs"
+      component: "xmonad-config:exe:taffybar"
+
     - path: "./test"
       component: "xmonad-config:test:xmonad-config-test"

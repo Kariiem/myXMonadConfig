@@ -27,6 +27,16 @@ dependencies:
 - xmonad
 - xmonad-contrib
 - xmobar
+- directory
+- filepath
+- gtk3
+- taffybar
+- X11>=1.8
+- data-default
+- gtk-strut
+- transformers
+- gi-gdk
+
 ghc-options:
 - -Wall
 - -Wcompat
@@ -61,7 +71,16 @@ executables:
     - -O2
     dependencies:
     - xmonad-config
-
+  taffybar:
+    source-dirs:        src 
+    main:               taffybar.hs
+    ghc-options:         
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:       
+    - xmonad-config
+    
 tests:
   xmonad-config-test:
     main:                Spec.hs
