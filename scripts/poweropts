@@ -1,0 +1,12 @@
+#!/bin/sh
+
+choice=`printf "cancel\npoweroff\nreboot" | dmenu -p "power-menu"`
+echo $choice
+case "$choice" in
+  "poweroff") shutdown -p now
+  ;;
+  "reboot") shutdown -r now
+  ;;
+  *) :
+  ;;
+esac

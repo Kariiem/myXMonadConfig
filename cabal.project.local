@@ -1,0 +1,3 @@
+ignore-project: False
+executable-stripping: True
+optimization: True
