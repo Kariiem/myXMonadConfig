@@ -56,13 +56,9 @@ import XMonad.Hooks.ManageHelpers
   -- Utils
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedActions
-import XMonad.Util.NamedScratchpad
-import XMonad.Util.Hacks qualified as Hacks
-import XMonad.Util.ClickableWorkspaces
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.NamedWindows
-import XMonad.Util.Dmenu
 
 --
 myTerminal :: String
@@ -103,11 +99,7 @@ myManageHook =
   composeAll
     [ manageSpawn
     , insertPosition Below Newer
-    , placeHook $ withGaps (16, 16, 16, 16) (smart (0.5, 0.5))
     ]
-
-mySpacing :: Integer -> Integer -> l a -> ModifiedLayout Spacing l a
-mySpacing i j = spacingRaw False (Border i (i + 20) i i) True (Border j j j j) True
 
 resizableTiled = renamed [Replace "tall"]
                $ ResizableTall 1 (3 / 100) (1 / 2) []
@@ -123,10 +115,9 @@ tabLayout = renamed [Replace "tabs"]
 
 full = renamed [Replace "monocle"] Full
 
-myLayout = id -- mySpacing defaultGapSize defaultGapSize
-         . avoidStruts
+myLayout = avoidStruts
          . smartBorders
-         . mkToggle (NOBORDERS ?? FULL ?? EOT )
+         . mkToggle (NOBORDERS ?? FULL ?? EOT)
          . mkToggle (single MIRROR )
          . renamed [KeepWordsRight 1]
          . minimize
@@ -256,5 +247,4 @@ myXConfig = def
   , logHook = workspaceHistoryHook
   , startupHook = do 
               setWMName "LG3D"
-              spawnOnce "polybar"
   }
