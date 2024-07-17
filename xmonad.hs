@@ -88,7 +88,7 @@ defaultGapSize :: Integer
 defaultGapSize = 10
 
 myWorkspaces :: [String]
-myWorkspaces = map show [1..4::Int]
+myWorkspaces = map show [1..9] -- ["gsoc", "nix", "ghc", "dev", "www", "xmonad", "sys"]
 
 myLogHook :: X ()
 myLogHook =
@@ -151,7 +151,7 @@ myKeys conf =
                , ("M-S-q"        , io exitSuccess)
                , ("M-S-r"        , refresh)
                , ("M-S-b"        , sendMessage ToggleStruts)
-               , ("M-<Space>"    , spawn "dmenu_run -l 10" )
+               , ("M-<Space>"    , spawn "~/.xmonad/scripts/run-recent -l 10" )
                , ("M-<Return>"   , spawn (terminal conf))
                , ("M-f f"        , toggleFull)
                , ("M-x"          , spawn "~/.xmonad/scripts/poweropts")
@@ -161,6 +161,7 @@ myKeys conf =
                , ("M-S-m"        , sendMessage $ Toggle MIRROR)
                , ("M-t s"        , toggleSpaces)
                , ("M-t b"        , sendMessage $ Toggle NOBORDERS)
+               , ("M-t S-b"      , (broadcastMessage $ Toggle NOBORDERS) >> refresh)
                , ("M-s"          , withFocused $ windows . W.sink)
                , ("M-,"          , sendMessage (IncMasterN 1))
                , ("M-."          , sendMessage (IncMasterN (-1)))
@@ -179,33 +180,17 @@ myKeys conf =
                , ("M-C-<Left>"   , shiftToPrev >> prevWS)
                , ("M-<Right>"    , nextWS)
                , ("M-<Left>"     , prevWS)
-               , ("M-1"          , windows $ W.greedyView $ ws !! 0)
-               , ("M-2"          , windows $ W.greedyView $ ws !! 1)
-               , ("M-3"          , windows $ W.greedyView $ ws !! 2)
-               , ("M-4"          , windows $ W.greedyView $ ws !! 3)
-               , ("M-5"          , windows $ W.greedyView $ ws !! 4)
-               , ("M-6"          , windows $ W.greedyView $ ws !! 5)
-               , ("M-7"          , windows $ W.greedyView $ ws !! 6)
-               , ("M-8"          , windows $ W.greedyView $ ws !! 7)
-               , ("M-9"          , windows $ W.greedyView $ ws !! 8)
-               , ("M-S-1"        , windows $ W.shift $ ws !! 0)
-               , ("M-S-2"        , windows $ W.shift $ ws !! 1)
-               , ("M-S-3"        , windows $ W.shift $ ws !! 2)
-               , ("M-S-4"        , windows $ W.shift $ ws !! 3)
-               , ("M-S-5"        , windows $ W.shift $ ws !! 4)
-               , ("M-S-6"        , windows $ W.shift $ ws !! 5)
-               , ("M-S-7"        , windows $ W.shift $ ws !! 6)
-               , ("M-S-8"        , windows $ W.shift $ ws !! 7)
-               , ("M-S-9"        , windows $ W.shift $ ws !! 8)
-               , ("M-C-1"        , windows $ copy $ ws !! 0)
-               , ("M-C-2"        , windows $ copy $ ws !! 1)
-               , ("M-C-3"        , windows $ copy $ ws !! 2)
-               , ("M-C-4"        , windows $ copy $ ws !! 3)
-               , ("M-C-5"        , windows $ copy $ ws !! 4)
-               , ("M-C-6"        , windows $ copy $ ws !! 5)
-               , ("M-C-7"        , windows $ copy $ ws !! 6)
-               , ("M-C-8"        , windows $ copy $ ws !! 7)
-               , ("M-C-9"        , windows $ copy $ ws !! 8)
+               ]
+               ++
+               [ ("M-"   ++ show i, windows . W.greedyView $ ws !! (i-1)) | i <- [1..length myWorkspaces]]
+               ++
+               [ ("M-S-" ++ show i, windows . W.shift $ ws !! (i-1))      | i <- [1..length myWorkspaces]]
+               ++
+               [ ("M-C-" ++ show i, windows . copy $ ws !! (i-1))         | i <- [1..length myWorkspaces]]
+               ++
+               [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+               , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +2%")
+               , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -2%")
                ]
      where
           ws = workspaces conf
@@ -224,7 +209,7 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 toggleFull = sendMessage (Toggle FULL) >> sendMessage ToggleStruts
 
 main :: IO ()
-main = xmonad 
+main = xmonad
      . docks
      . ewmh
      . ewmhFullscreen
@@ -242,9 +227,22 @@ myXConfig = def
   , keys = \conf -> mkKeymap conf $ myKeys conf
   , mouseBindings = myMouseBindings
   , layoutHook = myLayout
-  , manageHook = myManageHook 
-  , handleEventHook = swallowEventHook (className =? "st" <||> className =? "Alacritty") (return True) 
+  , manageHook = myManageHook
+  , handleEventHook = swallowEventHook (className =? "st-256color") (return True) -- <||> className =? "Alacritty") (return True)
   , logHook = workspaceHistoryHook
-  , startupHook = do 
-              setWMName "LG3D"
+  , startupHook = do
+      spawnOnce trayer
+      spawnOnce "polybar"
+      spawnOnOnce "9" "st -e btm"
+      setWMName "LG3D"
   }
+
+trayer = "trayer --edge top \
+         \--width 10 \
+         \--distancefrom top \
+         \--padding 6 \
+         \--SetDockType true \
+         \--SetPartialStrut false \
+         \--expand true \
+         \--transparent true \
+         \--alpha 0"

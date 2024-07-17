@@ -1,11 +1,15 @@
 #!/bin/sh
 
-choice=`printf "cancel\npoweroff\nreboot" | dmenu -p "power-menu"`
+choice=`printf "cancel\nlock\npoweroff\nreboot\nlogout" | dmenu -p "power-menu"`
 echo $choice
 case "$choice" in
-  "poweroff") shutdown -p now
+  "poweroff") loginctl poweroff
   ;;
-  "reboot") shutdown -r now
+  "reboot") loginctl reboot
+  ;;
+  "logout") loginctl terminate-user ""
+  ;;
+  "lock") i3lock -t -e -f -i "$HOME/wallpapers/lock.png"
   ;;
   *) :
   ;;
