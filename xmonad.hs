@@ -178,8 +178,10 @@ myKeys conf =
                , ("M-S-<Left>"   , shiftToPrev)
                , ("M-C-<Right>"  , shiftToNext >> nextWS)
                , ("M-C-<Left>"   , shiftToPrev >> prevWS)
-               , ("M-<Right>"    , nextWS)
+               , ("M-p"         , prevWS)
+               , ("M-n"         , nextWS)
                , ("M-<Left>"     , prevWS)
+               , ("M-<Right>"    , nextWS)
                ]
                ++
                [ ("M-"   ++ show i, windows . W.greedyView $ ws !! (i-1)) | i <- [1..length myWorkspaces]]
@@ -245,4 +247,5 @@ trayer = "trayer --edge top \
          \--SetPartialStrut false \
          \--expand true \
          \--transparent true \
+         \--tint '#181818' \
          \--alpha 0"
