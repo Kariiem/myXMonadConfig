@@ -178,8 +178,8 @@ myKeys conf =
                , ("M-S-<Left>"   , shiftToPrev)
                , ("M-C-<Right>"  , shiftToNext >> nextWS)
                , ("M-C-<Left>"   , shiftToPrev >> prevWS)
-               , ("M-p"         , prevWS)
-               , ("M-n"         , nextWS)
+               , ("M-a"         , prevWS)
+               , ("M-d"         , nextWS)
                , ("M-<Left>"     , prevWS)
                , ("M-<Right>"    , nextWS)
                ]
