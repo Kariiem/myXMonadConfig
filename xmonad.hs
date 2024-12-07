@@ -60,6 +60,9 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.NamedWindows
 
+  -- My Extensions
+import XMonad.Ext
+
 --
 myTerminal :: String
 myTerminal = "st" --"alacritty"
@@ -158,7 +161,7 @@ myKeys conf =
                , ("M-e"          , spawn "emacs")
                , ("M-S-<Tab>"    , setLayout $ layoutHook conf)
                , ("M-<Tab>"      , sendMessage NextLayout)
-               , ("M-S-m"        , sendMessage $ Toggle MIRROR)
+               , ("M-t r"        , sendMessage $ Toggle MIRROR)
                , ("M-t s"        , toggleSpaces)
                , ("M-t b"        , sendMessage $ Toggle NOBORDERS)
                , ("M-t S-b"      , (broadcastMessage $ Toggle NOBORDERS) >> refresh)
@@ -178,10 +181,12 @@ myKeys conf =
                , ("M-S-<Left>"   , shiftToPrev)
                , ("M-C-<Right>"  , shiftToNext >> nextWS)
                , ("M-C-<Left>"   , shiftToPrev >> prevWS)
-               , ("M-a"         , prevWS)
-               , ("M-d"         , nextWS)
+               , ("M-a"          , prevWS)
+               , ("M-d"          , nextWS)
                , ("M-<Left>"     , prevWS)
                , ("M-<Right>"    , nextWS)
+               , ("M-m"          , buryX)
+               , ("M-S-m"        , unburyX)
                ]
                ++
                [ ("M-"   ++ show i, windows . W.greedyView $ ws !! (i-1)) | i <- [1..length myWorkspaces]]
