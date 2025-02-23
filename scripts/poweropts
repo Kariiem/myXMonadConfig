@@ -9,7 +9,7 @@ case "$choice" in
   ;;
   "logout") loginctl terminate-user ""
   ;;
-  "lock") i3lock -t -e -f -i "$HOME/wallpapers/lock.png"
+  "lock") i3lock -e -c 000000 -u #-f #-i "$HOME/wallpapers/lock.png"
   ;;
   *) :
   ;;
