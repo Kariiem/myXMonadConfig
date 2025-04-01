@@ -154,11 +154,15 @@ myKeys conf =
                , ("M-S-q"        , io exitSuccess)
                , ("M-S-r"        , refresh)
                , ("M-S-b"        , sendMessage ToggleStruts)
-               , ("M-<Space>"    , spawn "~/.xmonad/scripts/run-recent -l 10" )
                , ("M-<Return>"   , spawn (terminal conf))
-               , ("M-f f"        , toggleFull)
-               , ("M-x"          , spawn "~/.xmonad/scripts/poweropts")
                , ("M-e"          , spawn "emacs")
+               , ("M-<Space>"    , spawn "~/.xmonad/scripts/run-recent" )
+               , ("M-p"          , spawn "~/.xmonad/scripts/pass" )
+               , ("M-x x"        , spawn "~/.xmonad/scripts/poweropts")
+               , ("M-x p"        , spawn "~/.xmonad/scripts/pdfhist")
+               , ("M-x s"        , spawn "~/.xmonad/scripts/screenshot")
+               , ("M-x u"        , spawn "~/.xmonad/scripts/update")
+               , ("M-f f"        , toggleFull)
                , ("M-S-<Tab>"    , setLayout $ layoutHook conf)
                , ("M-<Tab>"      , sendMessage NextLayout)
                , ("M-t r"        , sendMessage $ Toggle MIRROR)
@@ -195,10 +199,13 @@ myKeys conf =
                ++
                [ ("M-C-" ++ show i, windows . copy $ ws !! (i-1))         | i <- [1..length myWorkspaces]]
                ++
-               [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-               , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +2%")
-               , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -2%")
+               [ ("<XF86AudioMute>"        , spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+               , ("<XF86AudioRaiseVolume>" , spawn "pactl set-sink-volume @DEFAULT_SINK@ +2%")
+               , ("<XF86AudioLowerVolume>" , spawn "pactl set-sink-volume @DEFAULT_SINK@ -2%")
+               , ("<XF86MonBrightnessUp>"  , spawn "$HOME/.xmonad/scripts/bright inc")
+               , ("<XF86MonBrightnessDown>", spawn "$HOME/.xmonad/scripts/bright dec")
                ]
+
      where
           ws = workspaces conf
 
@@ -238,19 +245,7 @@ myXConfig = def
   , handleEventHook = swallowEventHook (className =? "st-256color") (return True) -- <||> className =? "Alacritty") (return True)
   , logHook = workspaceHistoryHook
   , startupHook = do
-      spawnOnce trayer
       spawnOnce "polybar"
       spawnOnOnce "9" "st -e btm"
       setWMName "LG3D"
   }
-
-trayer = "trayer --edge top \
-         \--width 10 \
-         \--distancefrom top \
-         \--padding 6 \
-         \--SetDockType true \
-         \--SetPartialStrut false \
-         \--expand true \
-         \--transparent true \
-         \--tint '#181818' \
-         \--alpha 0"

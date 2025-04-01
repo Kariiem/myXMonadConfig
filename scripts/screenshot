@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function get_timestamp {
+    date
+}
+function cp2cb {
+    xclip -selection clipboard -t image/png
+}
+
+maim_dir="$HOME/Pictures/Screenshots"
+declare -a modes=(
+"Fullscreen"
+"Select Region"
+"Active Window"
+)
+
+choice=$(printf '%s\n' "${modes[@]}" | dmenu -p "Select Option") || exit 1
+case "$choice" in
+    'Fullscreen')
+        maim_opts="-u" ;;
+    'Select Region')
+        maim_opts="-u -s -D -o" ;;
+    'Active Window')
+        maim_opts="-u -i $(xdotool getactivewindow)" ;;
+    *) exit 1 ;;
+esac
+
+target=( "Save" "Clip" "Both" )
+choice=$(printf '%s\n' "${target[@]}" | dmenu -p "Select Option") || exit 1
+case "$choice" in
+    'Save')
+        maim ${maim_opts} "${maim_dir}/$(get_timestamp).png" ;;
+    'Clip')
+        maim ${maim_opts} | xclip -selection clipboard -t image/png ;;
+    'Both')
+        maim ${maim_opts} | tee "${maim_dir}/$(get_timestamp).png" | xclip -selection clipboard -t image/png  ;;
+    *) exit 1 ;;
+esac

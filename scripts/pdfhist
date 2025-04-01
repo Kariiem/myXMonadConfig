@@ -1,0 +1,7 @@
+#!/bin/bash
+
+choice=$(tac ~/.pdf_history | dmenu -i -l 10 -p "Open")
+if ! $choice
+then
+zath "$choice"
+fi

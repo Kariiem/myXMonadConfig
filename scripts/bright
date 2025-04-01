@@ -1,0 +1,20 @@
+#!/bin/bash
+
+case "$1" in
+    'inc')
+        light_opts="-A 10" ;;
+    'dec')
+        light_opts="-U 10" ;;
+    *)
+        light_opts="-G";;
+esac
+
+# Arbitrary but unique message tag
+msgTag="mybrightness"
+
+light $light_opts > /dev/null
+
+brightness="$(light -G)"
+dunstify -a "brightness" -u low -t 500 \
+        -h string:x-dunst-stack-tag:$msgTag \
+        -h int:value:$brightness ""

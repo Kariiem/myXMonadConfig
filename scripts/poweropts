@@ -1,16 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
-choice=`printf "cancel\nlock\npoweroff\nreboot\nlogout" | dmenu -p "power-menu"`
-echo $choice
-case "$choice" in
-  "poweroff") loginctl poweroff
-  ;;
-  "reboot") loginctl reboot
-  ;;
-  "logout") loginctl terminate-user ""
-  ;;
-  "lock") i3lock -e -c 000000 -u #-f #-i "$HOME/wallpapers/lock.png"
-  ;;
-  *) :
-  ;;
-esac
+choice=$(printf 'cancel\nlock\nlogout\nhibernate\nsuspend\npoweroff\nreboot'|dmenu -i -p "Choose Option")
+[ $choice = "cancel"    ] ;
+[ $choice = "lock"      ] && dm-tool lock
+[ $choice = "logout"    ] && loginctl terminate-user
+[ $choice = "poweroff"  ] && poweroff
+[ $choice = "reboot"    ] && reboot
+[ $choice = "hibernate" ] && systemctl hibernate
+[ $choice = "suspend"   ] && systemctl suspend

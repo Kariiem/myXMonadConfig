@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#NEWLINE=$'\n'
+#updates="`checkupdates` $NEWLINE`pkg -Qua`"
+DEBUG=0
+updates=`{ checkupdates ; pkg -Qua; }`
+updates_count=`echo "$updates" | wc -l`
+echo "updates count:" $updates_count
+
+packages_info=`echo  "${updates}" | awk 'function nvl(x) {return x=="->"?"NA":x} {print "False",NR,nvl($1),nvl($2),nvl($NF)}'`
+
+[ "$DEBUG" ] && printf "%s\n" "$packages_info"
+
+ignored_packages=`yad --geometry=1400x800 --list --checklist \
+            --column="Ignore" \
+            --column="no.:NUM" \
+            --column="Package Name:TEXT" \
+            --column="Old version:TEXT" \
+            --column="New version:TEXT" \
+            $packages_info `
+#echo "$ignored_packages"
+yad_exit_code=$?
+
+ignored_packages_names=`echo "$ignored_packages" | awk -F'|' '{print $3","}'`
+[ "$DEBUG" ] && printf "%s\n" "$ignored_packages_names"
+
+ignored_packages_count=`echo "$ignored_packages" | awk -F'|' 'BEGIN {c=0;} {if ($3) c+=1} END {print c}'`
+echo "ignored packages count:" $ignored_packages_count
+
+ignored_packages_names_no_spaces=`echo $ignored_packages_names | tr -d ' '`
+echo $ignored_packages_names_no_spaces
+
+
+if (( $yad_exit_code == 0 )) && (( $updates_count > $ignored_packages_count ))
+then
+    alacritty -e bash -c "pkg -Syu --ignore=$ignored_packages_names_no_spaces"
+    notify-send "System update completed successfully!"
+else
+    notify-send "System update cancelled!"
+fi
